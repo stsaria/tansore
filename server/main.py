@@ -92,12 +92,13 @@ def attendance(barcode : str):
     <p>にご連絡ください</p>
 </body>
 </html>"""
-        if type == 0:
-            send_gmail(mail_address, app_pass, to, title[0], html.format(title[0], text[0].replace("/name/", name)))
-        else:
-            send_gmail(mail_address, app_pass, to, title[1], html.format(title[1], text[1].replace("/name/", name)))
+            if type == 0:
+                send_gmail(mail_address, app_pass, to, title[0], html.format(title[0], text[0].replace("/name/", name)))
+            else:
+                send_gmail(mail_address, app_pass, to, title[1], html.format(title[1], text[1].replace("/name/", name)))
         with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='a', encoding="utf-8") as f:
             f.write(f'\n{format_dt_now}/{str(type)}')
+        return 0
     except:
         return 1
 
@@ -109,12 +110,8 @@ def handle_client(client_socket, address):
                 break
             else:
                 result = attendance(barcode)
-                if result != 0:
-                    client_socket.send(f"ng/{result}".encode('utf-8'))
-                    client_socket.close()
-                else:
-                    client_socket.send(f"ok".encode('utf-8'))    
-                    client_socket.close()
+                client_socket.send(result.encode('utf-8'))
+                client_socket.close()
                 break
         client_socket.close()
         return 0
@@ -125,7 +122,7 @@ def handle_client(client_socket, address):
 def main(port = PORT):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(('127.0.0.1', port))
+    server_socket.bind(('0.0.0.0', port))
     server_socket.listen(5)
     try:
         while True:

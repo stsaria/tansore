@@ -1,4 +1,4 @@
-import socket, sys
+import readchar, socket, sys
 
 PORT = 52268
 
@@ -7,15 +7,40 @@ def create_client(ip,port):
     client.connect( (ip,port) )
     return client
 
-if __name__ == '__main__':
-    con = create_client(sys.argv[1], PORT)
-    print("Success connect to Server")
-    con.send("0000000000".encode('utf-8'))
+def main():
     while True:
-        data = con.recv(1024).decode('utf-8')
-        if not data:
+        try:
+            print("バーコードを読み込んでください")
+            barcode = ""
+            while True:
+                barcode = barcode + readchar.readchar()
+                if barcode:
+                    if " " in barcode: break
+            barcode = barcode.replace(" ", "")
+            print("サーバーに接続しています")
+            con = create_client(sys.argv[1], PORT)
+            con.send(barcode.encode('utf-8'))
+            while True:
+                result = con.recv(1024).decode('utf-8')
+                if not result:
+                    continue
+                con.close()
+                break
+            match result:
+                case 0:
+                    print("勤怠しました")
+                case 1:
+                    print("サーバー")
+            print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+        except ConnectionRefusedError:
+            print("サーバーへの接続に失敗しました")
             continue
-        print(data)
-        con.close()
-        break
-    print("Client finish")
+        except TimeoutError:
+            print("サーバーでの通信でタイムアウトしました")
+            continue
+        except Exception: 
+            print("原因不明なエラーが発生しました")
+            continue
+
+if __name__ == "__main__":
+    main()

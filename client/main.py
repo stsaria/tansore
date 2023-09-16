@@ -30,7 +30,13 @@ def main():
                 case 0:
                     print("勤怠しました")
                 case 1:
-                    print("サーバー")
+                    print("原因不明なエラーが発生しました（サーバー）")
+                case 2:
+                    print("正しいバーコードを読み込んでください")
+                case 3:
+                    print("リストから名前が見つかりませんでした")
+                case 4:
+                    print("10分の勤怠は許されません")
             print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
         except ConnectionRefusedError:
             print("サーバーへの接続に失敗しました")

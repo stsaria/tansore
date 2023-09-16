@@ -24,6 +24,7 @@ def main():
                 result = con.recv(1024).decode('utf-8')
                 if not result:
                     continue
+                print(result)
                 con.close()
                 break
             match result:

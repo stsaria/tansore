@@ -1,4 +1,4 @@
-import readchar, socket, sys
+import readchar, socket, time, sys
 
 PORT = 52268
 
@@ -38,6 +38,7 @@ def main():
                     print("リストから名前が見つかりませんでした")
                 case 4:
                     print("10分の勤怠は許されません")
+            time.sleep(3000)
             print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
         except ConnectionRefusedError:
             print("サーバーへの接続に失敗しました")

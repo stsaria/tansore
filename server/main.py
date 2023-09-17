@@ -46,8 +46,8 @@ def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_
         with open("./barcodes/"+barcode+".txt", 'r', encoding="utf-8") as f:
             for line in f:  pass
             last_line = line.split("/")
-            last_line_time = last_line[0].split(":")
-            last_line_which_one = last_line[1]
+            last_line_time = last_line[1].split(":")
+            last_line_which_one = last_line[2]
             if last_line_time[:3] == format_dt_now.split(":")[:3]:
                 if last_line_time[3] == format_dt_now.split(":")[3] and int(format_dt_now.split(":")[4]) - int(last_line_time[4]) <= 10:
                     return None, 1
@@ -61,7 +61,7 @@ def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_
         type = 0
     return type, 0
 
-def attendance(barcode : str):
+def attendance(barcode : str, address):
     try:
         format_dt_now = datetime.datetime.now().strftime('%Y:%m:%d:%H:%M:%S')
         data = get_personal_data(csv_file = "./barcodes/barcodes.csv")
@@ -97,22 +97,19 @@ def attendance(barcode : str):
             else:
                 send_gmail(mail_address, app_pass, to, title[1], html.format(title[1], text[1].replace("/name/", name)))
         with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='a', encoding="utf-8") as f:
-            f.write(f'\n{format_dt_now}/{str(type)}')
+            f.write(f'\n{address[0]},{address[1]}/{format_dt_now}/{str(type)}')
         return 0
     except:
         return 1
 
 def handle_client(client_socket, address):
     try:
-        print(address)
         while True:
             barcode = client_socket.recv(1024).decode('utf-8')
-            print(barcode)
             if not barcode:
                 break
             else:
-                result = str(attendance(barcode)).encode('utf-8')
-                print(result)
+                result = str(attendance(barcode, address)).encode('utf-8')
                 client_socket.send(result)
                 client_socket.close()
                 break

@@ -104,6 +104,7 @@ def attendance(barcode : str):
 
 def handle_client(client_socket, address):
     try:
+        print(address)
         while True:
             barcode = client_socket.recv(1024).decode('utf-8')
             if not barcode:

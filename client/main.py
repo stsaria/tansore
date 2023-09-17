@@ -17,7 +17,7 @@ def main():
                 if barcode:
                     if " " in barcode: break
             barcode = barcode.replace(" ", "")
-            print("サーバーに接続しています")
+            print(f"サーバーに接続しています\n{sys.argv[1]}")
             con = create_client(sys.argv[1], PORT)
             con.send(barcode.encode('utf-8'))
             while True:

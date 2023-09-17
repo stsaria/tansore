@@ -1,4 +1,4 @@
-import readchar, socket, time, sys
+import keyboard, socket, time, sys
 
 PORT = 52268
 
@@ -13,18 +13,22 @@ def main():
             print("バーコードを読み込んでください")
             barcode = ""
             while True:
-                barcode = barcode + readchar.readchar()
+                barcode = barcode + keyboard.read_key()
                 if barcode:
                     if " " in barcode: break
             barcode = barcode.replace(" ", "")
-            print(f"サーバーに接続しています\n{sys.argv[1]}")
+            print("サーバーに接続しています\n30秒ほど掛かる可能性があります")
             con = create_client(sys.argv[1], PORT)
+            print("サーバーに接続しました")
+            print("バーコードを送信しています")
             con.send(barcode.encode('utf-8'))
+            print("バーコードを送信しました")
+            print("応答を待っています")
             while True:
                 result = con.recv(1024).decode('utf-8')
                 if not result:
                     continue
-                print(result)
+                print("応答を受け取りました")
                 con.close()
                 break
             match int(result):

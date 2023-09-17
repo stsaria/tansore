@@ -27,7 +27,7 @@ def main():
                 print(result)
                 con.close()
                 break
-            match result:
+            match int(result):
                 case 0:
                     print("勤怠しました")
                 case 1:

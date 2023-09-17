@@ -111,9 +111,9 @@ def handle_client(client_socket, address):
             if not barcode:
                 break
             else:
-                result = attendance(barcode)
+                result = str(attendance(barcode)).encode('utf-8')
                 print(result)
-                client_socket.send(result.encode('utf-8'))
+                client_socket.send(result)
                 client_socket.close()
                 break
         client_socket.close()

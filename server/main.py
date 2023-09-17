@@ -107,10 +107,12 @@ def handle_client(client_socket, address):
         print(address)
         while True:
             barcode = client_socket.recv(1024).decode('utf-8')
+            print(barcode)
             if not barcode:
                 break
             else:
                 result = attendance(barcode)
+                print(result)
                 client_socket.send(result.encode('utf-8'))
                 client_socket.close()
                 break

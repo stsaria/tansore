@@ -41,17 +41,16 @@ def send(barcode, values):
             window["status"].update(status)
             con.close()
             break
-        match int(result):
-            case 0:
-                status = status + "勤怠しました\n"
-            case 1:
-                status = status + "原因不明なエラーが発生しました（サーバー）\n"
-            case 2:
-                status = status + "正しいバーコードを読み込んでください\n"
-            case 3:
-                status = status + "リストから名前が見つかりませんでした\n"
-            case 4:
-                status = status + "10分の勤怠は許されません\n"
+        if result == 0:
+            status = status + "勤怠しました\n"
+        elif result == 1:
+            status = status + "原因不明なエラーが発生しました（サーバー）\n"
+        elif result == 2:
+            status = status + "正しいバーコードを読み込んでください\n"
+        elif result == 3:
+            status = status + "リストから名前が見つかりませんでした\n"
+        elif result == 4:
+            status = status + "10分の勤怠は許されません\n"
         window["status"].update(status)
         return status
     except ConnectionRefusedError:

@@ -3,8 +3,6 @@ import PySimpleGUI as sg
 
 PORT = 52268
 
-time.sleep(30)
-
 while True:
     try:
         root = tkinter.Tk()
@@ -46,9 +44,10 @@ def send(barcode, values):
         status = status + "バーコードを送信しました\n応答を待っています\n"
         window["status"].update(status)
         while True:
-            result = int(con.recv(1024).decode('utf-8'))
+            result = con.recv(1024).decode('utf-8')
             if not result:
                 continue
+            result = int(result)
             status = status + "応答を受け取りました\n"
             window["status"].update(status)
             con.close()

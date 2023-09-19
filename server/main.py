@@ -100,6 +100,7 @@ def attendance(barcode : str, address):
             f.write(f'\n{address[0]},{address[1]}/{format_dt_now}/{str(type)}')
         return 0
     except:
+        print("aaa")
         return 1
 
 def handle_client(client_socket, address):

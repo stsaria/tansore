@@ -1,7 +1,10 @@
-import tkinter, socket, sys
+import tkinter, socket, time, sys
 import PySimpleGUI as sg
 
 PORT = 52268
+
+time.sleep(3000)
+
 while True:
     try:
         root = tkinter.Tk()
@@ -77,6 +80,7 @@ def send(barcode, values):
 
 def main():
     while True:
+        window["status"].expand(expand_x=True, expand_y=True)
         event, values = window.read(timeout=50)
         if event == sg.WIN_CLOSED:
             break

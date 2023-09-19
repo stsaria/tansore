@@ -1,6 +1,5 @@
 import tkinter, socket, sys
 import PySimpleGUI as sg
-import pyautogui as pag
 
 PORT = 52268
 while True:

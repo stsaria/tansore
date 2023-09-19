@@ -3,7 +3,7 @@ import PySimpleGUI as sg
 
 PORT = 52268
 
-time.sleep(3000)
+time.sleep(30)
 
 while True:
     try:
@@ -87,7 +87,7 @@ def main():
         elif " " in values["barcode"]:
             result = send(values["barcode"].replace(" ", ""), values)
             window["barcode"].update(values["barcode"].replace(" ", ""))
-            window["status"].update(result + "\n\nバーコードを読み込んでください")
+            window["status"].update(result + "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nバーコードを読み込んでください")
 
     window.close()
 

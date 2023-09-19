@@ -46,7 +46,7 @@ def send(barcode, values):
         status = status + "バーコードを送信しました\n応答を待っています\n"
         window["status"].update(status)
         while True:
-            result = con.recv(1024).decode('utf-8')
+            result = int(con.recv(1024).decode('utf-8'))
             if not result:
                 continue
             status = status + "応答を受け取りました\n"
@@ -87,7 +87,7 @@ def main():
         elif " " in values["barcode"]:
             result = send(values["barcode"].replace(" ", ""), values)
             window["barcode"].update(values["barcode"].replace(" ", ""))
-            window["status"].update(result + "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nバーコードを読み込んでください")
+            window["status"].update(result + "\n\nバーコードを読み込んでください")
             window["barcode"].update("")
 
     window.close()

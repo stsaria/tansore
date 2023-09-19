@@ -3,6 +3,8 @@ import PySimpleGUI as sg
 
 PORT = 52268
 
+time.sleep(30)
+
 while True:
     try:
         root = tkinter.Tk()

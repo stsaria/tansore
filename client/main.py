@@ -88,6 +88,7 @@ def main():
             result = send(values["barcode"].replace(" ", ""), values)
             window["barcode"].update(values["barcode"].replace(" ", ""))
             window["status"].update(result + "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nバーコードを読み込んでください")
+            window["barcode"].update("")
 
     window.close()
 

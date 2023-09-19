@@ -1,21 +1,31 @@
-import keyboard, socket, time, sys
+import tkinter, socket, sys
 import PySimpleGUI as sg
-
-sg.theme("SystemDefault1")
-
-layout = [
-    [sg.Text("Yes Barcode System", font=('Arial',15))],
-    [sg.Text("バーコード:"), sg.Input(key="barcode")],
-    [sg.Multiline(key="status", pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="バーコードを読み込んでください", autoscroll=True)]
-    ]
-
-window = sg.Window("Yes Barcode System", layout, margins=(0,0), resizable=True, finalize=True, no_titlebar=True, location=(0,0)).Finalize()
-window.Maximize()
-
-window["status"].expand(expand_x=True, expand_y=True)
-window["barcode"].set_focus()
+import pyautogui as pag
 
 PORT = 52268
+while True:
+    try:
+        root = tkinter.Tk()
+
+        monitor_height, monitor_width = root.winfo_screenheight(), root.winfo_screenwidth()
+        root.destroy()
+
+        sg.theme("SystemDefault1")
+
+        layout = [
+            [sg.Text("Yes Barcode System", font=('Arial',15))],
+            [sg.Text("バーコード:"), sg.Input(key="barcode")],
+            [sg.Multiline(key="status", pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="バーコードを読み込んでください", autoscroll=True)]
+            ]
+
+        window = sg.Window("Yes Barcode System", layout, margins=(0,0), size=(monitor_width, monitor_height), resizable=True, finalize=True, no_titlebar=True, location=(0,0)).Finalize()
+        window.Maximize()
+
+        window["status"].expand(expand_x=True, expand_y=True)
+        window["barcode"].set_focus()
+        break
+    except:
+        continue
 
 def create_client(ip,port):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -187,8 +187,6 @@ def main():
     mode = "main"
     while True:
         global window
-        global layout_main
-        global layout_edit
         global monitor_width
         global monitor_height
         event, values = window.read(timeout=50)

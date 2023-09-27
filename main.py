@@ -18,6 +18,8 @@ text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
 
 while True:
     try:
+        with open("barcodes/barcodes.csv", encoding="utf-8") as f:
+            text_list = f.readlines()
         root = tkinter.Tk()
 
         monitor_height, monitor_width = root.winfo_screenheight(), root.winfo_screenwidth()
@@ -37,17 +39,24 @@ while True:
                 [sg.Multiline(key="statusedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="情報を書いてください\n", autoscroll=True)],
                 [sg.Button('変更',key='edit')]
                 ]
+        layout_csv_view = [
+                [sg.Text('CSV VIEW', font=('Arial',15))],
+                [sg.Text('空はいま登録されてないバーコードです')],
+                [sg.Multiline(key="csv", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="".join(text_list[1:]).replace(",name,", ",空,"), autoscroll=True)]
+                ]
         layout_main = [
                 [sg.TabGroup
                 ([[sg.Tab("勤怠", layout_attendance),
-                sg.Tab("編集", layout_edit)]], size=(monitor_width, monitor_height))]
+                sg.Tab("編集", layout_edit),
+                sg.Tab("CSV閲覧", layout_csv_view)]], size=(monitor_width, monitor_height))]
                 ]
 
         window = sg.Window("Yes Barcode System", layout_main, margins=(0,0), size=(monitor_width, monitor_height), resizable=True, finalize=True, no_titlebar=True, location=(0,0)).Finalize()
         window.Maximize()
         window["barcodeattendance"].set_focus()
         break
-    except:
+    except Exception as e:
+        print(e)
         continue
 
 def replace_func(fname, replace_set):
@@ -173,9 +182,9 @@ def edit(barcode : str, name : str, email : str):
         if not barcode in barcodes:
             return 2, ""
         if name == "" or "," in name:
-            return 3, ""
+            name = "name"
         if email == "" or "," in email or not len(email.split("/")) == email.count('@'):
-            return 4, ""
+            email = "email"
         file_identification_rewriting("./barcodes/barcodes.csv", barcode, barcode+","+name+","+email+"\n")
         return 0, ""
     except:
@@ -226,10 +235,6 @@ def main():
                     status = status + "原因不明なエラーが発生しました\nエラーを報告しました\nerror: "+error+"\n"
                 elif result == 2:
                     status = status + "正しいバーコードを入力してください\n"
-                elif result == 2:
-                    status = status + "正しい名前を入力してください\n"
-                elif result == 4:
-                    status = status + "正しいEmailを入力してください\n"
                 window["statusedit"].update(status)
             except:
                 error = traceback.format_exc()
@@ -239,6 +244,9 @@ def main():
             window["barcodeedit"].update("")
             window["name"].update("")
             window["email"].update("")
+            with open("barcodes/barcodes.csv", encoding="utf-8") as f:
+                text_list = f.readlines()
+            window["csv"].update("".join(text_list[1:]).replace(",name,", ",空,"))
 
     window.close()
 

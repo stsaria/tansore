@@ -38,7 +38,7 @@ while True:
         layout_edit = [
                 [sg.Text('内容変更', font=('Arial',15))],
                 [sg.Text('バーコード'), sg.InputText(key='barcodeedit')],
-                [sg.Text('なまえ(ひらがな)'), sg.InputText(key='name')],
+                [sg.Text('名前'), sg.InputText(key='name')],
                 [sg.Text('Email("/"区切り)'), sg.InputText(key='email')],
                 [sg.Multiline(key="statusedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="情報を書いてください\n", autoscroll=True)],
                 [sg.Button('変更',key='edit')]
@@ -295,6 +295,7 @@ def main():
                 window["statussendcsv"].update("管理者ではありません\n")
                 continue
             try:
+                data = get_personal_data(csv_file = "./barcodes/barcodes.csv")
                 os.makedirs("csv", exist_ok=True)
                 files = os.listdir("barcodes")
                 arriving_files = []
@@ -302,12 +303,13 @@ def main():
                     if ".txt" in i:
                         arriving_files.append(i)
                 for i in arriving_files:
+                    name = data[i.replace(".txt", "")][0]
                     with open("barcodes/"+i, encoding="utf-8") as f:
                         text_list = f.readlines()
                     text = "時間,種類\n"
                     for j in text_list[1:]:
                         text = text + j.replace(":", "年", 1).replace(":", "月", 1).replace(":", "日", 1).replace("/0", ",登校").replace("/1", ",下校")
-                    with open("./csv/"+i.replace(".txt", ".csv"), mode='w', encoding="utf-8") as f:
+                    with open("./csv/"+name+"-"+i.replace(".txt", ".csv"), mode='w', encoding="utf-8") as f:
                         f.write(text)
                 zp = zipfile.ZipFile("csv.zip", "w")
                 for i in os.listdir("csv"):

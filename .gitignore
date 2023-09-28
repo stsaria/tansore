@@ -161,3 +161,4 @@ cython_debug/
 
 barcodes/
 barcodes.csv
+setting.ini

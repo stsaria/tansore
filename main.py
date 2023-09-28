@@ -1,4 +1,4 @@
-import configparser, tkinter, traceback, datetime, smtplib, csv, os
+import configparser, tkinter, traceback, datetime, smtplib, hashlib, csv, os
 from email.mime.text import MIMEText
 from email.utils import formatdate
 import PySimpleGUI as sg
@@ -11,6 +11,7 @@ ini = configparser.ConfigParser()
 path = os.getcwd() + os.sep + 'barcodes/setting.ini'
 ini.read(path, 'UTF-8')
 
+password = ini["admin"]["password"]
 mail_address = ini["gmail"]["mail_address"]
 app_pass = ini["gmail"]["app_pass"]
 title = [ini["title_setting"]["arriving"], ini["title_setting"]["gohome"]]
@@ -18,8 +19,6 @@ text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
 
 while True:
     try:
-        with open("barcodes/barcodes.csv", encoding="utf-8") as f:
-            text_list = f.readlines()
         root = tkinter.Tk()
 
         monitor_height, monitor_width = root.winfo_screenheight(), root.winfo_screenwidth()
@@ -40,11 +39,12 @@ while True:
                 [sg.Button('変更',key='edit')]
                 ]
         layout_csv_view = [
-                [sg.Text('CSV VIEW', font=('Arial',15))],
+                [sg.Text('CSV VIEW', font=('Arial',15)), sg.Button('CSVファイル送信',key='sendcsv'), sg.Text("", key='statussendcsv')],
                 [sg.Text('空はいま登録されてないバーコードです')],
-                [sg.Multiline(key="csv", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="".join(text_list[1:]).replace(",name,", ",空,"), autoscroll=True)]
+                [sg.Multiline(key="csv", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=('Arial',15), autoscroll=True)]
                 ]
         layout_main = [
+                [sg.Text("管理者パスワード"), sg.Input(key="password"), sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Text(key="statuslogin")],
                 [sg.TabGroup
                 ([[sg.Tab("勤怠", layout_attendance),
                 sg.Tab("編集", layout_edit),
@@ -101,7 +101,7 @@ def send_gmail(mail_address : str, app_pass : str, to : list, title : str, html 
         smtpobj.sendmail(mail_address, i, msg.as_string())
         smtpobj.close()
 
-def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_deadline_time = 18):
+def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_deadline_time = 19, arriving_isolation_period_min = 10):
     """0 = arriving, 1 = gohome"""
     type = None
     format_dt_now = dt.strftime('%Y:%m:%d:%H:%M:%S')
@@ -112,7 +112,7 @@ def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_
             last_line_time = last_line[0].split(":")
             last_line_which_one = last_line[1]
             if last_line_time[:3] == format_dt_now.split(":")[:3]:
-                if last_line_time[3] == format_dt_now.split(":")[3] and int(format_dt_now.split(":")[4]) - int(last_line_time[4]) <= 10:
+                if last_line_time[3] == format_dt_now.split(":")[3] and int(format_dt_now.split(":")[4]) - int(last_line_time[4]) <= arriving_isolation_period_min:
                     return None, 1
                 if last_line_which_one == "0" or int(last_line_time[3]) >= arriving_deadline_time:
                     type = 1
@@ -164,7 +164,7 @@ def attendance(barcode : str):
             else:
                 send_gmail(mail_address, app_pass, to, title[1], html.format(title[1], text[1].replace("/name/", name)))
         with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='a', encoding="utf-8") as f:
-            f.write(f'{format_dt_now}/{str(type)}')
+            f.write(f'\n{format_dt_now}/{str(type)}')
         return 0, ""
     except:
         error = traceback.format_exc()
@@ -194,10 +194,12 @@ def edit(barcode : str, name : str, email : str):
 
 def main():
     mode = "main"
+    login = False
+    global window
+    global password
+    global monitor_width
+    global monitor_height
     while True:
-        global window
-        global monitor_width
-        global monitor_height
         event, values = window.read(timeout=50)
         if event == sg.WIN_CLOSED:
             break
@@ -217,9 +219,9 @@ def main():
                 elif result == 4:
                     status = status + "リストから名前が見つかりませんでした\n"
                 elif result == 5:
-                    status = status + "10分の勤怠は許されません\n"
+                    status = status + "10分の動作は許されません\n"
                 window["statusattendance"].update(status)
-            except: 
+            except:
                 error = traceback.format_exc()
                 print(error)
                 window["statusattendance"].update(status + "GUIで原因不明なエラーが発生しました\nerror : "+error)
@@ -227,26 +229,74 @@ def main():
             window["barcodeattendance"].update("")
         elif event == 'edit':
             status = values["statusedit"] + "\n"
-            try:
-                result, error = edit(values["barcodeedit"], values["name"], values["email"])
-                if result == 0:
-                    status = status + "編集しました\n"
-                elif result == 1:
-                    status = status + "原因不明なエラーが発生しました\nエラーを報告しました\nerror: "+error+"\n"
-                elif result == 2:
-                    status = status + "正しいバーコードを入力してください\n"
+            if login == False:
+                status = status + "管理者ではありません\n"
                 window["statusedit"].update(status)
-            except:
-                error = traceback.format_exc()
-                print(error)
-                window["statusedit"].update(status + "GUIで原因不明なエラーが発生しました\nerror : "+error)
+                continue
+            else:
+                try:
+                    result, error = edit(values["barcodeedit"], values["name"], values["email"])
+                    if result == 0:
+                        status = status + "編集しました\n"
+                    elif result == 1:
+                        status = status + "原因不明なエラーが発生しました\nエラーを報告しました\nerror: "+error+"\n"
+                    elif result == 2:
+                        status = status + "正しいバーコードを入力してください\n"
+                    window["statusedit"].update(status)
+                except:
+                    error = traceback.format_exc()
+                    print(error)
+                    window["statusedit"].update(status + "GUIで原因不明なエラーが発生しました\nerror : "+error)
             window["statusedit"].update(status + "\n\n情報を書いてください")
             window["barcodeedit"].update("")
             window["name"].update("")
             window["email"].update("")
             with open("barcodes/barcodes.csv", encoding="utf-8") as f:
                 text_list = f.readlines()
-            window["csv"].update("".join(text_list[1:]).replace(",name,", ",空,"))
+            window["csv"].update("".join(text_list[1:]).replace(",name,email", ",空"))
+        elif event == 'sendcsv':
+            status = values["statussendcsv"] + "\n"
+            if login == False:
+                status = status + "管理者ではありません\n"
+                window["statussendcsv"].update(status)
+                continue
+            os.makedirs("csv", exist_ok=True)
+            files = os.listdir("barcodes")
+            arriving_files = []
+            for i in files:
+                if ".txt" in i:
+                    arriving_files.append(i)
+            with open("barcodes/barcodes.csv", encoding="utf-8") as f:
+                text_list = f.readlines()
+            for i in arriving_files:
+                text = "時間,種類\n"
+                for j in text_list[1:]:
+                    text = text + j.replace(":", "年", 1).replace(":", "月", 1).replace(":", "日", 1).replace(",0", ",登校").replace(",1", ",下校") + "\n"
+                with open("./csv/"+i.replace(".txt", ".csv"), mode='w', encoding="utf-8") as f:
+                    f.write(text)
+            
+        elif event == 'login':
+            if values["password"] == "":
+                window["statuslogin"].update("パスワードが空です")
+                continue
+            input_password = hashlib.sha256(values["password"].encode()).hexdigest()
+            if password == input_password:
+                window["password"].update("")
+                window["statuslogin"].update("ログインしました")
+                login = True
+            else:
+                window["statuslogin"].update("パスワードが違います")
+            with open("barcodes/barcodes.csv", encoding="utf-8") as f:
+                text_list = f.readlines()
+            window["csv"].update("".join(text_list[1:]).replace(",name,email", ",空"))
+        elif event == 'logout':
+            if login != True:
+                window["statuslogin"].update("ログインしていません")
+                continue
+            login = False
+            window["statuslogin"].update("ログアウトしました")
+            window["csv"].update("")
+            
 
     window.close()
 

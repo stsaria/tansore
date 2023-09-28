@@ -1,6 +1,11 @@
-import configparser, tkinter, traceback, datetime, smtplib, hashlib, csv, os
+import configparser, tkinter, traceback, datetime, smtplib, shutil, hashlib, zipfile, csv, os
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
+from email.mime.base import MIMEBase
+from email import encoders
+import smtplib
+import ssl
 import PySimpleGUI as sg
 
 PORT = 52268
@@ -39,7 +44,7 @@ while True:
                 [sg.Button('変更',key='edit')]
                 ]
         layout_csv_view = [
-                [sg.Text('CSV VIEW', font=('Arial',15)), sg.Button('CSVファイル送信',key='sendcsv'), sg.Text("", key='statussendcsv')],
+                [sg.Text('CSV VIEW', font=('Arial',15)), sg.Button('CSVファイル送信',key='sendcsv'), sg.Text(key="statussendcsv")],
                 [sg.Text('空はいま登録されてないバーコードです')],
                 [sg.Multiline(key="csv", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=('Arial',15), autoscroll=True)]
                 ]
@@ -100,6 +105,37 @@ def send_gmail(mail_address : str, app_pass : str, to : list, title : str, html 
 
         smtpobj.sendmail(mail_address, i, msg.as_string())
         smtpobj.close()
+
+def sendgmailfile(mail_address : str, app_pass : str, to : list, title : str, text : str, file : list):
+    for i in to:
+        _msg = MIMEMultipart()
+        _msg['From'] = mail_address
+        _msg['To'] = i
+        _msg['Subject'] = title
+        _msg['Date'] = formatdate(timeval=None, localtime=True)
+
+        # 本文の追加
+        _msg.attach(MIMEText(text, "plain"))
+
+        # 添付ファイルの追加
+        for filename in file:
+            with open(filename, 'rb') as _f:
+                part = MIMEBase('application', 'octet-stream')
+                part.set_payload(_f.read())
+
+            # base64 encode
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', 'attachment; filename= {}'.format(filename))
+
+            _msg.attach(part)
+
+        # セキュアなSSL接続で送信
+        context = ssl.create_default_context()
+
+        _smtp = smtplib.SMTP_SSL(host='smtp.gmail.com', port=465, timeout=10, context=context)
+        _smtp.login(user=mail_address, password=app_pass)
+        _smtp.sendmail(mail_address, i, _msg.as_string())
+        _smtp.close()
 
 def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_deadline_time = 19, arriving_isolation_period_min = 10):
     """0 = arriving, 1 = gohome"""
@@ -255,26 +291,36 @@ def main():
                 text_list = f.readlines()
             window["csv"].update("".join(text_list[1:]).replace(",name,email", ",空"))
         elif event == 'sendcsv':
-            status = values["statussendcsv"] + "\n"
             if login == False:
-                status = status + "管理者ではありません\n"
-                window["statussendcsv"].update(status)
+                window["statussendcsv"].update("管理者ではありません\n")
                 continue
-            os.makedirs("csv", exist_ok=True)
-            files = os.listdir("barcodes")
-            arriving_files = []
-            for i in files:
-                if ".txt" in i:
-                    arriving_files.append(i)
-            with open("barcodes/barcodes.csv", encoding="utf-8") as f:
-                text_list = f.readlines()
-            for i in arriving_files:
-                text = "時間,種類\n"
-                for j in text_list[1:]:
-                    text = text + j.replace(":", "年", 1).replace(":", "月", 1).replace(":", "日", 1).replace(",0", ",登校").replace(",1", ",下校") + "\n"
-                with open("./csv/"+i.replace(".txt", ".csv"), mode='w', encoding="utf-8") as f:
-                    f.write(text)
-            
+            try:
+                os.makedirs("csv", exist_ok=True)
+                files = os.listdir("barcodes")
+                arriving_files = []
+                for i in files:
+                    if ".txt" in i:
+                        arriving_files.append(i)
+                for i in arriving_files:
+                    with open("barcodes/"+i, encoding="utf-8") as f:
+                        text_list = f.readlines()
+                    text = "時間,種類\n"
+                    for j in text_list[1:]:
+                        text = text + j.replace(":", "年", 1).replace(":", "月", 1).replace(":", "日", 1).replace("/0", ",登校").replace("/1", ",下校")
+                    with open("./csv/"+i.replace(".txt", ".csv"), mode='w', encoding="utf-8") as f:
+                        f.write(text)
+                zp = zipfile.ZipFile("csv.zip", "w")
+                for i in os.listdir("csv"):
+                    zp.write("csv/"+i)
+                zp.close()
+                sendgmailfile(mail_address, app_pass, [mail_address], "CSV", "CSV", ["csv.zip"])
+                shutil.rmtree("csv")
+                os.remove("csv.zip")
+                window["statussendcsv"].update("送信しました\n")
+            except:
+                error = traceback.format_exc()
+                print(error)
+                window["statussendcsv"].update("原因不明なエラーが発生しました\nerror : "+error)
         elif event == 'login':
             if values["password"] == "":
                 window["statuslogin"].update("パスワードが空です")

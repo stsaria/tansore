@@ -55,7 +55,8 @@ while True:
                 [sg.Text(key="settingstatus")]
                 ]
         layout_main = [
-                [sg.Text("管理者パスワード"), sg.Input(key="password"), sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了", key="exit"), sg.Text(key="statuslogin")],
+                [sg.Text("管理者パスワード"), sg.Input(key="password"), sg.Text(key="statuslogin")],
+                [sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了", key="exit")],
                 [sg.TabGroup
                 ([[sg.Tab("勤怠", layout_attendance),
                 sg.Tab("編集", layout_edit),

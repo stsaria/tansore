@@ -48,12 +48,19 @@ while True:
                 [sg.Text('空はいま登録されてないバーコードです')],
                 [sg.Multiline(key="csv", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=('Arial',15), autoscroll=True)]
                 ]
+        layout_setting = [
+                [sg.Text('設定', font=('Arial',15))],
+                [sg.Text('パスワード設定')],
+                [sg.Text('パスワード再設定'), sg.Input(key="repassword"), sg.Button("設定", key="passwordsetting")],
+                [sg.Text(key="settingstatus")]
+                ]
         layout_main = [
-                [sg.Text("管理者パスワード"), sg.Input(key="password"), sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Text(key="statuslogin")],
+                [sg.Text("管理者パスワード"), sg.Input(key="password"), sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了", key="exit"), sg.Text(key="statuslogin")],
                 [sg.TabGroup
                 ([[sg.Tab("勤怠", layout_attendance),
                 sg.Tab("編集", layout_edit),
-                sg.Tab("CSV閲覧", layout_csv_view)]], size=(monitor_width, monitor_height))]
+                sg.Tab("CSV閲覧", layout_csv_view),
+                sg.Tab("設定", layout_setting)]], size=(monitor_width, monitor_height))]
                 ]
 
         window = sg.Window("Yes Barcode System", layout_main, margins=(0,0), size=(monitor_width, monitor_height), resizable=True, finalize=True, no_titlebar=True, location=(0,0)).Finalize()
@@ -324,7 +331,10 @@ def main():
                 print(error)
                 window["statussendcsv"].update("原因不明なエラーが発生しました\nerror : "+error)
         elif event == 'login':
-            if values["password"] == "":
+            if login == True:
+                window["statuslogin"].update("すでにログインしています")
+                continue
+            elif values["password"] == "":
                 window["statuslogin"].update("パスワードが空です")
                 continue
             input_password = hashlib.sha256(values["password"].encode()).hexdigest()
@@ -334,6 +344,7 @@ def main():
                 login = True
             else:
                 window["statuslogin"].update("パスワードが違います")
+                continue
             with open("barcodes/barcodes.csv", encoding="utf-8") as f:
                 text_list = f.readlines()
             window["csv"].update("".join(text_list[1:]).replace(",name,email", ",空"))
@@ -344,7 +355,21 @@ def main():
             login = False
             window["statuslogin"].update("ログアウトしました")
             window["csv"].update("")
-            
+        elif event == "passwordsetting":
+            try:
+                if login != True:
+                    window["settingstatus"].update("管理者ではありません\n")
+                    continue
+                input_password = hashlib.sha256(values["repassword"].encode()).hexdigest()
+                file_identification_rewriting("./barcodes/setting.ini", "password", "password = "+input_password+"\n")
+                window["repassword"].update("")
+                window["settingstatus"].update("パスワードを変更しました 再起動してください\n")
+            except:
+                error = traceback.format_exc()
+                print(error)
+                window["settingstatus"].update("原因不明なエラーが発生しました\nerror : "+error+"\n")
+        elif event == "exit":
+            return
 
     window.close()
 

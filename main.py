@@ -157,9 +157,9 @@ def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_
             last_line_time = last_line[0].split(":")
             last_line_which_one = last_line[1]
             if last_line_time[:3] == format_dt_now.split(":")[:3]:
-                if last_line_time[3] == format_dt_now.split(":")[3] and int(format_dt_now.split(":")[4]) - int(last_line_time[4]) <= arriving_isolation_period_min:
+                if last_line_time[3] == format_dt_now.split(":")[3] and (int(format_dt_now.split(":")[4]) - int(last_line_time[4])) <= arriving_isolation_period_min:
                     return None, 1
-                if last_line_which_one == "0" or int(last_line_time[3]) >= arriving_deadline_time:
+                elif last_line_which_one == "0" or int(last_line_time[3]) >= arriving_deadline_time:
                     type = 1
                 else:
                     type = 0

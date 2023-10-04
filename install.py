@@ -41,7 +41,7 @@ for i in range(len(data)):
     generator.save(f"./barcodes/{codes[i]}-barcode.png")
 
 with open(f'./barcodes/setting.ini', mode='w', encoding="utf-8") as f:
-    f.write(f"[admin]\npassword = {password}\n[gmail]\nmail_address = \napp_pass =\n[title_setting]\narriving = 到着報告\ngohome = 出発報告\n[text_setting]\narriving = /name/さんが{location}に到着しました\ngohome = /name/さんが{location}を出発しました")
+    f.write(f"[admin]\npassword = {password}\n[gmail]\nmail_address = \napp_pass =\n[title_setting]\narriving = 到着報告\ngohome = 出発報告\n[text_setting]\narriving = /name/さんが{location}に到着しました\ngohome = /name/さんが{location}を出発しました\n[etc]\nsend_csv_deadline_day = 26\nsend_csv_deadline_time = 8\narriving_deadline_time = 18\narriving_isolation_period_min = 10")
 
 with open(f'./barcodes/barcodes.csv', mode='w', encoding="utf-8") as f:
     f.write('barcode,name,email\n')

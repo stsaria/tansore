@@ -10,8 +10,6 @@ import PySimpleGUI as sg
 
 PORT = 52268
 
-mode = ""
-
 ini = configparser.ConfigParser()
 path = os.getcwd() + os.sep + 'barcodes/setting.ini'
 ini.read(path, 'UTF-8')
@@ -21,13 +19,15 @@ mail_address = ini["gmail"]["mail_address"]
 app_pass = ini["gmail"]["app_pass"]
 title = [ini["title_setting"]["arriving"], ini["title_setting"]["gohome"]]
 text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
+etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
 
 while True:
     try:
         root = tkinter.Tk()
 
         monitor_height, monitor_width = root.winfo_screenheight(), root.winfo_screenwidth()
-        root.destroy()
+        root.withdraw()
+
         sg.theme("SystemDefault1")
         layout_attendance = [
                 [sg.Text("Yes Barcode System", font=('Arial',15))],
@@ -56,20 +56,21 @@ while True:
                 ]
         layout_main = [
                 [sg.Text("管理者パスワード"), sg.Input(key="password"), sg.Text(key="statuslogin")],
-                [sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了", key="exit")],
+                [sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了", key="exit"), sg.Text(key="time", font=('Arial',15))],
                 [sg.TabGroup
                 ([[sg.Tab("勤怠", layout_attendance),
-                sg.Tab("編集", layout_edit),
-                sg.Tab("CSV閲覧", layout_csv_view),
-                sg.Tab("設定", layout_setting)]], size=(monitor_width, monitor_height))]
+                sg.Tab("編集", layout_edit, disabled=True, key='editab'),
+                sg.Tab("CSV閲覧", layout_csv_view, disabled=True, key='csvviewtab'),
+                sg.Tab("設定", layout_setting, disabled=True, key='settingtab')]], size=(monitor_width, monitor_height))]
                 ]
 
         window = sg.Window("Yes Barcode System", layout_main, margins=(0,0), size=(monitor_width, monitor_height), resizable=True, finalize=True, no_titlebar=True, location=(0,0)).Finalize()
         window.Maximize()
         window["barcodeattendance"].set_focus()
         break
-    except Exception as e:
-        print(e)
+    except:
+        error = traceback.format_exc()
+        print("This is Gui-error -----\n"+error+"-----------------------")
         continue
 
 def replace_func(fname, replace_set):
@@ -145,7 +146,7 @@ def sendgmailfile(mail_address : str, app_pass : str, to : list, title : str, te
         _smtp.sendmail(mail_address, i, _msg.as_string())
         _smtp.close()
 
-def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_deadline_time = 19, arriving_isolation_period_min = 10):
+def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_deadline_time = 18, arriving_isolation_period_min = 10):
     """0 = arriving, 1 = gohome"""
     type = None
     format_dt_now = dt.strftime('%Y:%m:%d:%H:%M:%S')
@@ -185,7 +186,7 @@ def attendance(barcode : str):
             error = traceback.format_exc()
             print(error)
             return 2, error
-        type, result = which_arriving_gohome(barcode)
+        type, result = which_arriving_gohome(barcode, arriving_deadline_time = etc[2], arriving_isolation_period_min = etc[3])
         if result == 1:
             return 5, ""
         if not to == "":
@@ -237,15 +238,22 @@ def edit(barcode : str, name : str, email : str):
         return 1, error
 
 def main():
-    mode = "main"
     login = False
     global window
     global password
     global monitor_width
     global monitor_height
     while True:
+        format_dt_now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+        final_send_csv_season = ["", "", ""]
+        if os.path.isfile("./barcodes/csvlog.txt"):
+            f = open('./barcodes/csvlog.txt', 'r')
+            alltxt = f.readlines()
+            f.close()
+            final_send_csv_season = alltxt[-1].strip().split("/")
         event, values = window.read(timeout=50)
-        if event == sg.WIN_CLOSED:
+        window["time"].update(format_dt_now)
+        if event == sg.WIN_CLOSED or event == "exit":
             break
         elif " " in values["barcodeattendance"]:
             try:
@@ -298,8 +306,8 @@ def main():
             with open("barcodes/barcodes.csv", encoding="utf-8") as f:
                 text_list = f.readlines()
             window["csv"].update("".join(text_list[1:]).replace(",name,email", ",空"))
-        elif event == 'sendcsv':
-            if login == False:
+        elif event == 'sendcsv' or int(format_dt_now.split(" ")[0].split("/")[2]) >= etc[0] and int(format_dt_now.split(" ")[1].split(":")[0]) >= etc[1] and not [format_dt_now.split(" ")[0].split("/")[0], format_dt_now.split(" ")[0].split("/")[1]] == [final_send_csv_season[0], final_send_csv_season[1]]:
+            if event == 'sendcsv' and login == False:
                 window["statussendcsv"].update("管理者ではありません\n")
                 continue
             try:
@@ -308,7 +316,7 @@ def main():
                 files = os.listdir("barcodes")
                 arriving_files = []
                 for i in files:
-                    if ".txt" in i:
+                    if ".txt" in i and i.replace(".txt", "").isdigit():
                         arriving_files.append(i)
                 for i in arriving_files:
                     name = data[i.replace(".txt", "")][0]
@@ -326,6 +334,9 @@ def main():
                 sendgmailfile(mail_address, app_pass, [mail_address], "CSV", "CSV", ["csv.zip"])
                 shutil.rmtree("csv")
                 os.remove("csv.zip")
+                if login == False:
+                    with open(f'./barcodes/csvlog.txt', mode='a', encoding="utf-8") as f:
+                        f.write("\n"+format_dt_now.split(" ")[0])
                 window["statussendcsv"].update("送信しました\n")
             except:
                 error = traceback.format_exc()
@@ -342,6 +353,9 @@ def main():
             if password == input_password:
                 window["password"].update("")
                 window["statuslogin"].update("ログインしました")
+                window["editab"].update(disabled=False)
+                window["csvviewtab"].update(disabled=False)
+                window["settingtab"].update(disabled=False)
                 login = True
             else:
                 window["statuslogin"].update("パスワードが違います")
@@ -354,6 +368,9 @@ def main():
                 window["statuslogin"].update("ログインしていません")
                 continue
             login = False
+            window["editab"].update(disabled=True)
+            window["csvviewtab"].update(disabled=True)
+            window["settingtab"].update(disabled=True)
             window["statuslogin"].update("ログアウトしました")
             window["csv"].update("")
         elif event == "passwordsetting":
@@ -369,9 +386,6 @@ def main():
                 error = traceback.format_exc()
                 print(error)
                 window["settingstatus"].update("原因不明なエラーが発生しました\nerror : "+error+"\n")
-        elif event == "exit":
-            return
-
     window.close()
 
 if __name__ == "__main__":

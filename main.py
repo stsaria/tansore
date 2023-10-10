@@ -8,8 +8,6 @@ import smtplib
 import ssl
 import PySimpleGUI as sg
 
-PORT = 52268
-
 ini = configparser.ConfigParser()
 path = os.getcwd() + os.sep + 'barcodes/setting.ini'
 ini.read(path, 'UTF-8')
@@ -34,8 +32,7 @@ while True:
                 [sg.Text("バーコード:"), sg.Input(key="barcodeattendance")],
                 [sg.Multiline(key="statusattendance", expand_x=True, expand_y=True,  pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="バーコードを読み込んでください\n", autoscroll=True)]
                 ]
-
-        layout_edit = [
+        layout_csv_edit = [
                 [sg.Text('内容変更', font=('Arial',15))],
                 [sg.Text('バーコード'), sg.InputText(key='barcodeedit')],
                 [sg.Text('名前'), sg.InputText(key='name')],
@@ -44,24 +41,33 @@ while True:
                 [sg.Button('変更',key='edit')]
                 ]
         layout_csv_view = [
-                [sg.Text('CSV VIEW', font=('Arial',15)), sg.Button('CSVファイル送信',key='sendcsv'), sg.Text(key="statussendcsv")],
+                [sg.Text('CSV VIEW', font=('Arial',15)), sg.Button('勤怠情報送信',key='sendcsv'), sg.Text(key="statussendcsv")],
                 [sg.Text('空はいま登録されてないバーコードです')],
                 [sg.Multiline(key="csv", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=('Arial',15), autoscroll=True)]
                 ]
         layout_setting = [
                 [sg.Text('設定', font=('Arial',15))],
-                [sg.Text('パスワード設定')],
+                [sg.Text('パスワード設定', font=('Arial',13))],
                 [sg.Text('パスワード再設定'), sg.Input(key="repassword"), sg.Button("設定", key="passwordsetting")],
                 [sg.Text(key="settingstatus")]
                 ]
+        layout_direct_edit_file = [
+                [sg.Text('Direct Edit File', font=('Arial',15)), sg.Text(key="statusdirectedit")],
+                [sg.Text('警告：直接ファイルを書き換えることは推奨されていません , 出席履歴ファイルは書き換えれません')],
+                [sg.Combo(['barcodes.csv', 'setting.ini', '../manual.txt'], key='selectfile', default_value="ファイルを選択してください", enable_events=True, readonly=True)],
+                [sg.Multiline(key="inputedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), font=('Arial',15), autoscroll=True)],
+                [sg.Button('書き換え',key='directedit'), sg.Button('再取得(巻き戻し)',key='regetfile')]
+                ]
         layout_main = [
                 [sg.Text("管理者パスワード"), sg.Input(key="password"), sg.Text(key="statuslogin")],
-                [sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了", key="exit"), sg.Text(key="time", font=('Arial',15))],
-                [sg.TabGroup
-                ([[sg.Tab("勤怠", layout_attendance),
-                sg.Tab("編集", layout_edit, disabled=True, key='editab'),
-                sg.Tab("CSV閲覧", layout_csv_view, disabled=True, key='csvviewtab'),
-                sg.Tab("設定", layout_setting, disabled=True, key='settingtab')]], size=(monitor_width, monitor_height))]
+                [sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了(再起動)", key="exit"), sg.Text(key="time", font=('Arial',15))],
+                [sg.TabGroup([[
+                sg.Tab("勤怠", layout_attendance),
+                sg.Tab("CSV編集", layout_csv_edit, visible=False, key='editab'),
+                sg.Tab("CSV閲覧", layout_csv_view, visible=False, key='csvviewtab'),
+                sg.Tab("直接編集", layout_direct_edit_file, visible=False, key='directeditfiletab'),
+                sg.Tab("設定", layout_setting, visible=False, key='settingtab')
+                ]], size=(monitor_width, monitor_height))]
                 ]
 
         window = sg.Window("Yes Barcode System", layout_main, margins=(0,0), size=(monitor_width, monitor_height), resizable=True, finalize=True, no_titlebar=True, location=(0,0)).Finalize()
@@ -177,19 +183,17 @@ def attendance(barcode : str):
         name = ""
         try:
             to = data[barcode][1].split("/")
-            if to == "" or not len(to) == data[barcode][1].count('@'):
-                return 3, ""
             name = data[barcode][0]
-            if name == "":
-                return 4, ""
+            if name == "" or name == "name":
+                return 3, ""
         except:
             error = traceback.format_exc()
             print(error)
             return 2, error
         type, result = which_arriving_gohome(barcode, arriving_deadline_time = etc[2], arriving_isolation_period_min = etc[3])
         if result == 1:
-            return 5, ""
-        if not to == "":
+            return 4, ""
+        if len(to) == data[barcode][1].count('@'):
             html = """
 <!DOCTYPE html>
 <html>
@@ -267,10 +271,8 @@ def main():
                 elif result == 2:
                     status = status + "正しいバーコードを読み込んでください\nerror: "+error+"\n"
                 elif result == 3:
-                    status = status + "リストからメールが見つかりませんでした\n"
-                elif result == 4:
                     status = status + "リストから名前が見つかりませんでした\n"
-                elif result == 5:
+                elif result == 4:
                     status = status + "10分の動作は許されません\n"
                 window["statusattendance"].update(status)
             except:
@@ -306,6 +308,8 @@ def main():
             with open("barcodes/barcodes.csv", encoding="utf-8") as f:
                 text_list = f.readlines()
             window["csv"].update("".join(text_list[1:]).replace(",name,email", ",空"))
+            if values["selectfile"] == "barcodes.csv":
+                window["inputedit"].update("".join(text_list))
         elif event == 'sendcsv' or int(format_dt_now.split(" ")[0].split("/")[2]) >= etc[0] and int(format_dt_now.split(" ")[1].split(":")[0]) >= etc[1] and not [format_dt_now.split(" ")[0].split("/")[0], format_dt_now.split(" ")[0].split("/")[1]] == [final_send_csv_season[0], final_send_csv_season[1]]:
             if event == 'sendcsv' and login == False:
                 window["statussendcsv"].update("管理者ではありません\n")
@@ -327,6 +331,10 @@ def main():
                         text = text + j.replace(":", "年", 1).replace(":", "月", 1).replace(":", "日", 1).replace("/0", ",登校").replace("/1", ",下校")
                     with open("./csv/"+name+"-"+i.replace(".txt", ".csv"), mode='w', encoding="utf-8") as f:
                         f.write(text)
+                    with open("./barcodes/old-"+format_dt_now.split(" ")[0].split("/")[0]+"-"+format_dt_now.split(" ")[0].split("/")[1]+"-"+i, mode='w', encoding="utf-8") as f:
+                        f.write("".join(text_list[1:]))
+                    with open("barcodes/"+i, mode="w", encoding="utf-8") as f:
+                        f.write("")
                 zp = zipfile.ZipFile("csv.zip", "w")
                 for i in os.listdir("csv"):
                     zp.write("csv/"+i)
@@ -337,7 +345,7 @@ def main():
                 if login == False:
                     with open(f'./barcodes/csvlog.txt', mode='a', encoding="utf-8") as f:
                         f.write("\n"+format_dt_now.split(" ")[0])
-                window["statussendcsv"].update("送信しました\n")
+                window["statussendcsv"].update("送信しました")
             except:
                 error = traceback.format_exc()
                 print(error)
@@ -353,9 +361,10 @@ def main():
             if password == input_password:
                 window["password"].update("")
                 window["statuslogin"].update("ログインしました")
-                window["editab"].update(disabled=False)
-                window["csvviewtab"].update(disabled=False)
-                window["settingtab"].update(disabled=False)
+                window["editab"].update(visible=True)
+                window["csvviewtab"].update(visible=True)
+                window["settingtab"].update(visible=True)
+                window["directeditfiletab"].update(visible=True)
                 login = True
             else:
                 window["statuslogin"].update("パスワードが違います")
@@ -363,15 +372,19 @@ def main():
             with open("barcodes/barcodes.csv", encoding="utf-8") as f:
                 text_list = f.readlines()
             window["csv"].update("".join(text_list[1:]).replace(",name,email", ",空"))
+            if values["selectfile"] == "barcodes.csv":
+                window["inputedit"].update("".join(text_list))
         elif event == 'logout':
             if login != True:
                 window["statuslogin"].update("ログインしていません")
                 continue
             login = False
-            window["editab"].update(disabled=True)
-            window["csvviewtab"].update(disabled=True)
-            window["settingtab"].update(disabled=True)
+            window["editab"].update(visible=False)
+            window["csvviewtab"].update(visible=False)
+            window["settingtab"].update(visible=False)
+            window["directeditfiletab"].update(visible=False)
             window["statuslogin"].update("ログアウトしました")
+            window["inputedit"].update("")
             window["csv"].update("")
         elif event == "passwordsetting":
             try:
@@ -386,6 +399,50 @@ def main():
                 error = traceback.format_exc()
                 print(error)
                 window["settingstatus"].update("原因不明なエラーが発生しました\nerror : "+error+"\n")
+        elif event == "selectfile":
+            with open(f"barcodes/"+values["selectfile"], encoding="utf-8") as f:
+                text = f.read()
+            window["inputedit"].update(text)
+        elif event == "directedit":
+            if login == False:
+                window["statusdirectedit"].update("管理者ではありません")
+                continue
+            try:
+                if not "." in values["selectfile"]:
+                    window["statusdirectedit"].update("選択したファイル名が空です")
+                    continue
+                with open(f"barcodes/"+values["selectfile"], encoding="utf-8") as f:
+                    text = f.read()
+                with open(f"barcodes/"+values["selectfile"], encoding="utf-8", mode="w") as f:
+                    f.write(values["inputedit"])
+                if not values["inputedit"] == text:
+                    with open(f"barcodes/"+values["selectfile"]+".backup", encoding="utf-8", mode="w") as f:
+                        f.write(text)
+                if values["selectfile"] == "barcodes.csv":
+                    window["csv"].update(values["inputedit"].replace(",name,email", ",空"))
+                window["statusdirectedit"].update("書き換えに成功しました\n再起動してください\n(一個前のバックアップはbarcodes/"+values["selectfile"]+".backupにあります)")
+            except:
+                error = traceback.format_exc()
+                print(error)
+                window["statusdirectedit"].update("書き換えに失敗しました")
+        elif event == "regetfile":
+            if login == False:
+                window["statusdirectedit"].update("管理者ではありません")
+                continue
+            try:
+                if not "." in values["selectfile"]:
+                    window["statusdirectedit"].update("選択したファイル名が空です")
+                    continue
+                with open(f"barcodes/"+values["selectfile"], encoding="utf-8") as f:
+                    text = f.read()
+                window["inputedit"].update(text)
+                window["statusdirectedit"].update("ファイルを再取得しました")
+            except:
+                error = traceback.format_exc()
+                print(error)
+                window["statusdirectedit"].update("ファイルの再取得に失敗しました")
+
+
     window.close()
 
 if __name__ == "__main__":

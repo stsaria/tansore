@@ -1,5 +1,6 @@
 Barcode Systemの説明
 
+-GUIでのマニュアル-
 [1 . バーコードリーダーのセットアップ]
 /
 -リーダーをコンピューターにつなぐ
@@ -52,4 +53,25 @@ _CSVファイルの閲覧/
 -CSV閲覧のタブに移動します
 -"勤怠情報送信"ボタンを押します
 -"送信しました"と出たら成功です
+/
+-END-
+-ファイルの編集系-
+[1 . iniファイルの編集]
+/
+[admin]
+password = SHA256のパスワード(改変はしないで)
+[gmail]
+mail_address = 送信先メールアドレス(Gmail)
+app_pass = Gmailから取得したアプリパスワード(スペースなし)
+[title_setting]
+arriving = 到着時メールのタイトル(デフォルト:到着報告)
+gohome = 出発時メールのタイトル(デフォルト:出発報告)
+[text_setting]
+arriving = 到着時メールの本文(/name/で名前)(デフォルト:/name/さんがyesに到着しました)
+gohome = 出発時メールの本文(/name/で名前)(デフォルト:/name/さんがyesに出発しました)
+[etc]
+send_csv_deadline_day = 勤怠情報の締め切り日(デフォルト:26)
+send_csv_deadline_time = 勤怠情報の締め切り時(デフォルト:8)
+arriving_deadline_time = 到着の締め切り時(デフォルト:18)
+arriving_isolation_period_min = 勤怠のクルータイム分(デフォルト:10)
 /

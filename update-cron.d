@@ -1,0 +1,1 @@
+0 6 * * * root systemctl stop yesBarcodeSystem && rm -r :Path:/yesBarcodeSystem && wget -P :Path:/yesBarcodeSystem https://github.com/stsaria/yesBarcodeSystem/raw/main/main.py && systemctl start yesBarcodeSystem

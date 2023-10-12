@@ -228,7 +228,7 @@ def edit(barcode : str, name : str, email : str):
             header = next(reader)
             for row in reader:
                 barcodes.append(row[0])
-        if not barcode in barcodes:
+        if not barcode in barcodes or not len(barcode) == 10 or not barcode.isdigit():
             return 2, ""
         if name == "" or "," in name:
             name = "name"

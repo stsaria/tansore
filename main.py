@@ -1,4 +1,4 @@
-import configparser, tkinter, traceback, datetime, smtplib, shutil, hashlib, zipfile, csv, os
+import configparser, platform, tkinter, traceback, datetime, smtplib, shutil, hashlib, zipfile, csv, os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
@@ -8,16 +8,19 @@ import smtplib
 import ssl
 import PySimpleGUI as sg
 
-ini = configparser.ConfigParser()
-path = os.getcwd() + os.sep + 'barcodes/setting.ini'
-ini.read(path, 'UTF-8')
+try:
+    ini = configparser.ConfigParser()
+    path = os.getcwd() + os.sep + 'barcodes/setting.ini'
+    ini.read(path, 'UTF-8')
 
-password = ini["admin"]["password"]
-mail_address = ini["gmail"]["mail_address"]
-app_pass = ini["gmail"]["app_pass"]
-title = [ini["title_setting"]["arriving"], ini["title_setting"]["gohome"]]
-text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
-etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
+    password = ini["admin"]["password"]
+    mail_address = ini["gmail"]["mail_address"]
+    app_pass = ini["gmail"]["app_pass"]
+    title = [ini["title_setting"]["arriving"], ini["title_setting"]["gohome"]]
+    text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
+    etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
+except:
+    print("error:ini file read")
 
 while True:
     try:
@@ -47,8 +50,14 @@ while True:
                 ]
         layout_setting = [
                 [sg.Text('設定', font=('Arial',15))],
+                [sg.Text('_____________________________________________________________________________________________________________________')],
                 [sg.Text('パスワード設定', font=('Arial',13))],
                 [sg.Text('パスワード再設定'), sg.Input(key="repassword"), sg.Button("設定", key="passwordsetting")],
+                [sg.Text('_____________________________________________________________________________________________________________________')],
+                [sg.Text(f"コンピューター情報\nOS:{platform.system()} {platform.release()}\nPython:{platform.python_version()}")],
+                [sg.Text('_____________________________________________________________________________________________________________________')],
+                [sg.Text('作成者 : stsaria\nライセンス : LGPL Licence')]
+                [sg.Text('_____________________________________________________________________________________________________________________')],
                 [sg.Text(key="settingstatus")]
                 ]
         layout_direct_edit_file = [
@@ -128,25 +137,15 @@ def sendgmailfile(mail_address : str, app_pass : str, to : list, title : str, te
         _msg['To'] = i
         _msg['Subject'] = title
         _msg['Date'] = formatdate(timeval=None, localtime=True)
-
-        # 本文の追加
         _msg.attach(MIMEText(text, "plain"))
-
-        # 添付ファイルの追加
         for filename in file:
             with open(filename, 'rb') as _f:
                 part = MIMEBase('application', 'octet-stream')
                 part.set_payload(_f.read())
-
-            # base64 encode
             encoders.encode_base64(part)
             part.add_header('Content-Disposition', 'attachment; filename= {}'.format(filename))
-
             _msg.attach(part)
-
-        # セキュアなSSL接続で送信
         context = ssl.create_default_context()
-
         _smtp = smtplib.SMTP_SSL(host='smtp.gmail.com', port=465, timeout=10, context=context)
         _smtp.login(user=mail_address, password=app_pass)
         _smtp.sendmail(mail_address, i, _msg.as_string())

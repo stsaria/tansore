@@ -14,7 +14,7 @@ Environment="DISPLAY=:0.0"
 Environment="XAUTHORITY=/home/:UserName:/.Xauthority"
 
 #ExecStartPre = /usr/bin/printenv
-ExecStart=/usr/bin/python :Path:/yesBarcodeSystem/client/main.py %i
+ExecStart=/usr/bin/python :Path:/yesBarcodeSystem/main.py %i
 
 [Install]
 WantedBy = graphical.target

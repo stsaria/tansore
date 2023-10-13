@@ -155,6 +155,8 @@ def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_
     """0 = arriving, 1 = gohome"""
     type = None
     format_dt_now = dt.strftime('%Y:%m:%d:%H:%M:%S')
+    if int(format_dt_now.split(":")[3]) >= arriving_deadline_time:
+        return 1, 0
     if os.path.isfile("./barcodes/"+barcode+".txt"):
         with open("./barcodes/"+barcode+".txt", 'r', encoding="utf-8") as f:
             for line in f:  pass
@@ -164,8 +166,10 @@ def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_
             if last_line_time[:3] == format_dt_now.split(":")[:3]:
                 if last_line_time[3] == format_dt_now.split(":")[3] and (int(format_dt_now.split(":")[4]) - int(last_line_time[4])) <= arriving_isolation_period_min:
                     return None, 1
-                elif last_line_which_one == "0" or int(last_line_time[3]) >= arriving_deadline_time:
+                elif last_line_which_one == "0":
                     type = 1
+                elif int(last_line_time[3]) >= arriving_deadline_time:
+                    type = 0
                 else:
                     type = 0
             else:
@@ -212,7 +216,7 @@ def attendance(barcode : str):
             else:
                 send_gmail(mail_address, app_pass, to, title[1], html.format(title[1], text[1].replace("/name/", name)))
         with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='a', encoding="utf-8") as f:
-            f.write(f'\n{format_dt_now}/{str(type)}')
+            f.write(f'{format_dt_now}/{str(type)}\n')
         return 0, ""
     except:
         error = traceback.format_exc()
@@ -326,12 +330,12 @@ def main():
                     with open("barcodes/"+i, encoding="utf-8") as f:
                         text_list = f.readlines()
                     text = "時間,種類\n"
-                    for j in text_list[1:]:
+                    for j in text_list:
                         text = text + j.replace(":", "年", 1).replace(":", "月", 1).replace(":", "日", 1).replace("/0", ",登校").replace("/1", ",下校")
                     with open("./csv/"+name+"-"+i.replace(".txt", ".csv"), mode='w', encoding="utf-8") as f:
                         f.write(text)
                     with open("./barcodes/old-"+format_dt_now.split(" ")[0].split("/")[0]+"-"+format_dt_now.split(" ")[0].split("/")[1]+"-"+i, mode='w', encoding="utf-8") as f:
-                        f.write("".join(text_list[1:]))
+                        f.write("".join(text_list))
                     with open("barcodes/"+i, mode="w", encoding="utf-8") as f:
                         f.write("")
                 zp = zipfile.ZipFile("csv.zip", "w")

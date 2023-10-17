@@ -206,15 +206,11 @@ def attendance(barcode : str):
 <head>
     <title>{0}</title>
 </head>
-<body style="background-color: #f2f1ed; text-align: center;">
+<body style="display: inline-block; background-color: #d8d1b3; text-align: center; padding : 15px 30px 15px 30px; padding: 10px; margin-bottom: 10px; border: 1px solid #333333;">
     <h1 style="font-family:Courier;">Tansore -Attendance System-</h1>
-    <div style="display:inline-block; background:#fcfcff; padding : 15px 30px 15px 30px;">
-        <h4>このメールは{1}から発信されています</h4>
-        <div style="padding: 10px; background-color: #f2f1ed; display:inline-block;">
-            {2}
-        </div>
-        <h4>このメールと同時に{1}にも<br/>勤怠データが保存されています</h4>
-    </div>
+    <h4>このメールは{1}から発信されています</h4>
+    {2}
+    <h4>このメールと同時に{1}にも<br/>勤怠データが保存されています</h4>
     <footer>
     <div style="font-size:12px;">
         <p>バグがありましたら<a href="mailto:solothunder.autoer@gmail.com">solothunder.autoer@gmail.com</a>にご連絡ください</p>

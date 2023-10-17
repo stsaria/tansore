@@ -15,6 +15,7 @@ def install_print():
 
 def main():
     global end
+    print("Note: This English text was translated from Japanese by Deepl\n")
     if not os.path.isfile("./main.py"):
         print("Run install.py in the tansole directory")
     file = input("Please enter the CSV file containing personal information : ")
@@ -87,7 +88,7 @@ WantedBy = graphical.target""")
         print(error)
         return 1
     end = True
-    print(" Success\nservice file and cron file (root) created in [linux-file] directory")
+    print(" Success\nNote: You need to fill in the ini file with your or group\ngmail address and the app password (Google API password) in order to send the email\nservice file and cron file (root) created in [linux-file] directory")
     return 0
 
 if __name__ == "__main__":

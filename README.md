@@ -20,6 +20,12 @@
 pip install aspose-barcode-for-python-via-net 
 pip install pysimplegui
 ```
+- 個人情報CSVファイルを作成(記述方法は以下)<br/>
+```
+名前,メールアドレス
+abc,aaa@bbb.ccc
+hoge,fuga@piyo.aho
+```
 - install.pyを起動して指示通りインストール<br/>
 - main.pyを起動して勤怠システムを使用する<br/>
 - 必要があればcronやsystemdを設定する<br/>

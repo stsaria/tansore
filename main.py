@@ -8,14 +8,35 @@ import smtplib
 import ssl
 import PySimpleGUI as sg
 
+def replace_func(fname, replace_set):
+    target, replace = replace_set
+    with open(fname, 'r', encoding='utf-8') as f1:
+        tmp_list =[]
+        for row in f1:
+            if row.find(target) != -1:
+                tmp_list.append(replace)
+            else:
+                tmp_list.append(row)
+    with open(fname, 'w', encoding='utf-8') as f2:
+        for i in range(len(tmp_list)):
+            f2.write(tmp_list[i])
+
+def file_identification_rewriting(file_name, before, after):
+    replace_setA = (before, after)
+    replace_func(file_name, replace_setA)
+
 try:
+    with open("./barcodes/setting.ini", encoding='utf-8') as f:
+        text = f.read()
+    if not "location" in text:
+        file_identification_rewriting("./barcodes/setting.ini", "[etc]", "[etc]\nlocation = 未設定な施設\n")
     ini = configparser.ConfigParser()
     path = os.getcwd() + os.sep + 'barcodes/setting.ini'
     ini.read(path, 'UTF-8')
-
     password = ini["admin"]["password"]
     mail_address = ini["gmail"]["mail_address"]
     app_pass = ini["gmail"]["app_pass"]
+    location = ini["etc"]["location"]
     title = [ini["title_setting"]["arriving"], ini["title_setting"]["gohome"]]
     text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
     etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
@@ -31,12 +52,12 @@ while True:
 
         sg.theme("SystemDefault1")
         layout_attendance = [
-                [sg.Text("Yes Barcode System", font=('Arial',15))],
+                [sg.Text("Tansore -Attendance System-", font=('',15))],
                 [sg.Text("バーコード:"), sg.Input(key="barcodeattendance")],
                 [sg.Multiline(key="statusattendance", expand_x=True, expand_y=True,  pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="バーコードを読み込んでください\n", autoscroll=True)]
                 ]
         layout_csv_edit = [
-                [sg.Text('内容変更', font=('Arial',15))],
+                [sg.Text('内容変更', font=('',15))],
                 [sg.Text('バーコード'), sg.InputText(key='barcodeedit')],
                 [sg.Text('名前'), sg.InputText(key='name')],
                 [sg.Text('Email("/"区切り)'), sg.InputText(key='email')],
@@ -44,14 +65,14 @@ while True:
                 [sg.Button('変更',key='edit')]
                 ]
         layout_csv_view = [
-                [sg.Text('CSV VIEW', font=('Arial',15)), sg.Button('勤怠情報送信',key='sendcsv'), sg.Text(key="statussendcsv")],
+                [sg.Text('CSV VIEW', font=('',15)), sg.Button('勤怠情報送信',key='sendcsv'), sg.Text(key="statussendcsv")],
                 [sg.Text('空はいま登録されてないバーコードです')],
                 [sg.Multiline(key="csv", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=('Arial',15), autoscroll=True)]
                 ]
         layout_setting = [
-                [sg.Text('設定', font=('Arial',15))],
+                [sg.Text('設定', font=('',15))],
                 [sg.Text('_____________________________________________________________________________________________________________________')],
-                [sg.Text('パスワード設定', font=('Arial',13))],
+                [sg.Text('パスワード設定', font=('',13))],
                 [sg.Text('パスワード再設定'), sg.Input(key="repassword"), sg.Button("設定", key="passwordsetting")],
                 [sg.Text('_____________________________________________________________________________________________________________________')],
                 [sg.Text(f"コンピューター情報\nOS:{platform.system()} {platform.release()}\nPython:{platform.python_version()}")],
@@ -61,10 +82,10 @@ while True:
                 [sg.Text(key="settingstatus")]
                 ]
         layout_direct_edit_file = [
-                [sg.Text('Direct Edit File', font=('Arial',15)), sg.Text(key="statusdirectedit")],
+                [sg.Text('Direct Edit File', font=('',15)), sg.Text(key="statusdirectedit")],
                 [sg.Text('警告：直接ファイルを書き換えることは推奨されていません , 出席履歴ファイルは書き換えれません')],
-                [sg.Combo(['barcodes.csv', 'setting.ini', '../manual.txt'], key='selectfile', default_value="ファイルを選択してください", enable_events=True, readonly=True)],
-                [sg.Multiline(key="inputedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), font=('Arial',15), autoscroll=True)],
+                [sg.Combo(['barcodes.csv', 'setting.ini'], key='selectfile', default_value="ファイルを選択してください", enable_events=True, readonly=True)],
+                [sg.Multiline(key="inputedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), font=('',15), autoscroll=True)],
                 [sg.Button('書き換え',key='directedit'), sg.Button('再取得(巻き戻し)',key='regetfile')]
                 ]
         layout_main = [
@@ -87,23 +108,6 @@ while True:
         error = traceback.format_exc()
         print("This is Gui-error -----\n"+error+"-----------------------")
         continue
-
-def replace_func(fname, replace_set):
-    target, replace = replace_set
-    with open(fname, 'r', encoding='utf-8') as f1:
-        tmp_list =[]
-        for row in f1:
-            if row.find(target) != -1:
-                tmp_list.append(replace)
-            else:
-                tmp_list.append(row)
-    with open(fname, 'w', encoding='utf-8') as f2:
-        for i in range(len(tmp_list)):
-            f2.write(tmp_list[i])
-
-def file_identification_rewriting(file_name, before, after):
-    replace_setA = (before, after)
-    replace_func(file_name, replace_setA)
 
 def get_personal_data(csv_file : str):
     data = {}
@@ -197,24 +201,33 @@ def attendance(barcode : str):
         if result == 1:
             return 4, ""
         if len(to) == data[barcode][1].count('@'):
-            html = """
-<!DOCTYPE html>
+            html = """<!DOCTYPE html>
 <html>
 <head>
     <title>{0}</title>
 </head>
-<body>
-    <h1>YES Barcode System</h1>
-    {1}
-    <p>バグがありましたら</p>
-    <a href="mailto:solothunder.autoer@gmail.com">solothunder.autoer@gmail.com</a>
-    <p>にご連絡ください</p>
+<body style="background-color: #f2f1ed; text-align: center;">
+    <h1 style="font-family:Courier;">Tansore -Attendance System-</h1>
+    <div style="display:inline-block; background:#fcfcff; padding : 15px 30px 15px 30px;">
+        <h4>このメールは{1}から発信されています</h4>
+        <div style="padding: 10px; background-color: #f2f1ed; display:inline-block;">
+            {2}
+        </div>
+        <h4>このメールと同時に{1}にも<br/>勤怠データが保存されています</h4>
+    </div>
+    <footer>
+    <div style="font-size:12px;">
+        <p>バグがありましたら<a href="mailto:solothunder.autoer@gmail.com">solothunder.autoer@gmail.com</a>にご連絡ください</p>
+        <p>Saria(st) <a href="https://github.com/stsaria">Gtihub</a><br/>
+        Discord : test222</p>
+    </div>
+    </footer>
 </body>
 </html>"""
             if type == 0:
-                send_gmail(mail_address, app_pass, to, title[0], html.format(title[0], text[0].replace("/name/", name)))
+                send_gmail(mail_address, app_pass, to, title[0], html.format(title[0], location, text[0].replace("/name/", name)))
             else:
-                send_gmail(mail_address, app_pass, to, title[1], html.format(title[1], text[1].replace("/name/", name)))
+                send_gmail(mail_address, app_pass, to, title[1], html.format(title[1], location, text[1].replace("/name/", name)))
         with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='a', encoding="utf-8") as f:
             f.write(f'{format_dt_now}/{str(type)}\n')
         return 0, ""

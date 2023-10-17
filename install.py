@@ -15,12 +15,11 @@ def install_print():
 
 def main():
     global end
-    print("Note: This English text was translated from Japanese by Deepl\n")
     if not os.path.isfile("./main.py"):
-        print("Run install.py in the tansole directory")
-    file = input("Please enter the CSV file containing personal information : ")
-    location = input("Enter the name of the facility where the system is located : ")
-    password = hashlib.sha256(input("Please enter new administrator password : ").encode()).hexdigest()
+        print("install.pyをtansoleディレクトリの中で実行してください")
+    file = input("個人情報が記載されているCSVファイル名を入力してください : ")
+    location = input("システムが設置されている施設名を入力してください : ")
+    password = hashlib.sha256(input("新しい管理者パスワードを入力してください : ").encode()).hexdigest()
     install_print_thread = threading.Thread(target=install_print)
     install_print_thread.start()
     try:
@@ -88,7 +87,7 @@ WantedBy = graphical.target""")
         print(error)
         return 1
     end = True
-    print(" Success\nNote: You need to fill in the ini file with your or group\ngmail address and the app password (Google API password) in order to send the email\nservice file and cron file (root) created in [linux-file] directory")
+    print(" Success\n注: 勤怠するためにはiniファイルにGmailアドレス(あなたまたは組織用)とアプリパスワード(Google Api Token)を記載する必要があります\nLinux用のSystemdファイル(.serviceファイル)やcronファイル(root用)を./linux-file/ディレクトリに作成しました")
     return 0
 
 if __name__ == "__main__":

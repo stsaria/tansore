@@ -57,7 +57,7 @@ while True:
                 [sg.Multiline(key="statusattendance", expand_x=True, expand_y=True,  pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="バーコードを読み込んでください\n", autoscroll=True)]
                 ]
         layout_csv_edit = [
-                [sg.Text('内容変更', font=('',15))],
+                [sg.Text('内容変更', font=('',15)), sg.Text('注:・何も入力しない場合は空になります\n・BackUpファイルは一個しかありません\n2回変えると一回目のデータは消えます')],
                 [sg.Text('バーコード'), sg.InputText(key='barcodeedit')],
                 [sg.Text('名前'), sg.InputText(key='name')],
                 [sg.Text('Email("/"区切り)'), sg.InputText(key='email')],
@@ -235,18 +235,35 @@ def attendance(barcode : str):
 def edit(barcode : str, name : str, email : str):
     try:
         barcodes = []
+        names = []
+        emails = []
         with open("./barcodes/barcodes.csv", encoding='utf-8') as f:
             reader = csv.reader(f)
             header = next(reader)
             for row in reader:
                 barcodes.append(row[0])
+                names.append(row[1])
+                emails.append(row[2])
+        num = None
         if not barcode in barcodes or not len(barcode) == 10 or not barcode.isdigit():
             return 2, ""
-        if name == "" or "," in name:
-            name = "name"
-        if email == "" or "," in email or not len(email.split("/")) == email.count('@'):
-            email = "email"
-        file_identification_rewriting("./barcodes/barcodes.csv", barcode, barcode+","+name+","+email+"\n")
+        for i in range(len(barcodes)):
+            if barcodes[i] == barcode:
+                num = i
+        before_name = names[num]
+        before_email = emails[num]
+        if email == "" or "," in email or not len(email.split("/")) == email.count('@') or not len(email.split("/")) == email.count('.'):
+            after_email = "email"
+        if not before_email == "email":
+            after_email = before_email
+        if name == "" and email == "email" or "," in name:
+            after_name = "name"
+        elif name == "":
+            after_name = before_name
+        if name == "" and email == "":
+            after_email = "email"
+            after_name = "name"
+        file_identification_rewriting("./barcodes/barcodes.csv", barcode, barcode+","+after_name+","+after_email+"\n")
         return 0, ""
     except:
         error = traceback.format_exc()
@@ -301,9 +318,13 @@ def main():
                 continue
             else:
                 try:
+                    with open("barcodes/barcodes.csv", encoding="utf-8") as f:
+                        text = f.read()
+                    with open(f"barcodes/barcodes.csv.backup", encoding="utf-8", mode="w") as f:
+                        f.write(text)
                     result, error = edit(values["barcodeedit"], values["name"], values["email"])
                     if result == 0:
-                        status = status + "編集しました\n"
+                        status = status + "編集しました\nbarcodes/barcodes.csv.backupがバックアップファイルです"
                     elif result == 1:
                         status = status + "原因不明なエラーが発生しました\nエラーを報告しました\nerror: "+error+"\n"
                     elif result == 2:

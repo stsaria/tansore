@@ -222,8 +222,10 @@ def attendance(barcode : str):
                 send_gmail(mail_address, app_pass, to, title[0], html.format(title[0], location, text[0].replace("/name/", name)))
             else:
                 send_gmail(mail_address, app_pass, to, title[1], html.format(title[1], location, text[1].replace("/name/", name)))
-        with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='r', encoding="utf-8") as f:
-            text_list = f.readlines()
+        text_list = []
+        if os.path.isfile("./barcodes/"+barcode.replace(" ", "")+".txt"):
+            with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='r', encoding="utf-8") as f:
+                text_list = f.readlines()
         with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='a', encoding="utf-8") as f:
             if len(text_list) > 0:
                 f.write(f'\n{format_dt_now}/{str(type)}')

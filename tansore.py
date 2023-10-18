@@ -171,16 +171,15 @@ def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_
                 if last_line_time[3] == format_dt_now.split(":")[3] and (int(format_dt_now.split(":")[4]) - int(last_line_time[4])) <= arriving_isolation_period_min:
                     return None, 1
                 elif last_line_which_one == "0":
-                    type = 1
+                    return 1, 0
                 elif int(last_line_time[3]) >= arriving_deadline_time:
-                    type = 0
+                    return 0, 0
                 else:
-                    type = 0
+                    return 0, 0
             else:
-                type = 0
+                return 0, 0
     else:
-        type = 0
-    return type, 0
+        return 0, 0
 
 def attendance(barcode : str):
     try:
@@ -224,8 +223,10 @@ def attendance(barcode : str):
                 send_gmail(mail_address, app_pass, to, title[0], html.format(title[0], location, text[0].replace("/name/", name)))
             else:
                 send_gmail(mail_address, app_pass, to, title[1], html.format(title[1], location, text[1].replace("/name/", name)))
-        with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='a', encoding="utf-8") as f:
-            f.write(f'{format_dt_now}/{str(type)}\n')
+        with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='a+', encoding="utf-8") as f:
+            if len(f.readlines()) > 0:
+                f.write('\n')
+            f.write(f'{format_dt_now}/{str(type)}')
         return 0, ""
     except:
         error = traceback.format_exc()

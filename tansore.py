@@ -195,7 +195,7 @@ def attendance(barcode : str):
             error = traceback.format_exc()
             print(error)
             return 2, error
-        type, result = which_arriving_gohome(barcode, arriving_deadline_time = etc[2], arriving_isolation_period_min = etc[3])
+        type, result = which_arriving_gohome(barcode, arriving_deadline_time = etc[2], arriving_isolation_period_min = etc[3], dt = datetime.datetime.now())
         if result == 1:
             return 4, ""
         if len(to) == data[barcode][1].count('@'):

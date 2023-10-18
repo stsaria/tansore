@@ -256,11 +256,11 @@ def edit(barcode : str, name : str, email : str):
         after_email = email
         if email == "" or "," in email or not len(email.split("/")) == email.count('@'):
             after_email = "email"
-        if not before_email == "email":
+        if not before_email == "email" and after_email == "email":
             after_email = before_email
         if name == "" and email == "email" or "," in name:
             after_name = "name"
-        elif name == "":
+        elif name == "" and after_name == "name":
             after_name = before_name
         if name == "" and email == "":
             after_email = "email"

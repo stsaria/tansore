@@ -157,7 +157,6 @@ def sendgmailfile(mail_address : str, app_pass : str, to : list, title : str, te
 
 def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_deadline_time = 18, arriving_isolation_period_min = 10):
     """0 = arriving, 1 = gohome"""
-    type = None
     format_dt_now = dt.strftime('%Y:%m:%d:%H:%M:%S')
     if int(format_dt_now.split(":")[3]) >= arriving_deadline_time:
         return 1, 0
@@ -225,8 +224,9 @@ def attendance(barcode : str):
                 send_gmail(mail_address, app_pass, to, title[1], html.format(title[1], location, text[1].replace("/name/", name)))
         with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='a+', encoding="utf-8") as f:
             if len(f.readlines()) > 0:
-                f.write('\n')
-            f.write(f'{format_dt_now}/{str(type)}')
+                f.write(f'\n{format_dt_now}/{str(type)}')
+            else:
+                f.write(f'{format_dt_now}/{str(type)}')
         return 0, ""
     except:
         error = traceback.format_exc()

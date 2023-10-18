@@ -305,11 +305,11 @@ def main():
                 elif result == 1:
                     status = status + "原因不明なエラーが発生しました\nエラーを報告しました\nerror: "+error+"\n"
                 elif result == 2:
-                    status = status + "正しいバーコードを読み込んでください\nerror: "+error+"\n"
+                    status = status + "正しいバーコードを読み込んでください\n"
                 elif result == 3:
                     status = status + "リストから名前が見つかりませんでした\n"
                 elif result == 4:
-                    status = status + "10分の動作は許されません\n"
+                    status = status + f"{str(etc[3])}分の動作は許されません\n"
                 window["statusattendance"].update(status)
             except:
                 error = traceback.format_exc()

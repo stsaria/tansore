@@ -252,6 +252,7 @@ def edit(barcode : str, name : str, email : str):
                 num = i
         before_name = names[num]
         before_email = emails[num]
+        after_name = after_email = ""
         if email == "" or "," in email or not len(email.split("/")) == email.count('@') or not len(email.split("/")) == email.count('.'):
             after_email = "email"
         if not before_email == "email":

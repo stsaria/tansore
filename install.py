@@ -15,7 +15,7 @@ def install_print():
 
 def main():
     global end
-    if not os.path.isfile("./main.py"):
+    if not os.path.isfile("./tansore.py"):
         print("install.pyをtansoleディレクトリの中で実行してください")
     file = input("個人情報が記載されているCSVファイル名を入力してください : ")
     location = input("システムが設置されている施設名を入力してください : ")
@@ -74,12 +74,12 @@ Environment="DISPLAY=:0.0"
 Environment="XAUTHORITY=/home/{os.getlogin()}/.Xauthority"
 
 #ExecStartPre = /usr/bin/printenv
-ExecStart=/usr/bin/python {os.path.abspath(".")}/main.py %i
+ExecStart=/usr/bin/python {os.path.abspath(".")}/tansore.py %i
 
 [Install]
 WantedBy = graphical.target""")
         with open(f'./linux-file/update-cron.d.root', mode='w', encoding="utf-8") as f:
-            f.write(f"""0 19 * * * root systemctl stop tansore && rm {os.path.abspath(".")}/main.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/main.py && systemctl start tansore
+            f.write(f"""0 19 * * * root systemctl stop tansore && rm {os.path.abspath(".")}/tansore.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/tansore.py && systemctl start tansore
 0 19 * * * root systemctl stop tansore && rm {os.path.abspath(".")}/install.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/install.py && systemctl start tansore""")
     except:
         print(" Error\n")

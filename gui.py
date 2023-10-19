@@ -68,16 +68,10 @@ def gui():
         try:
             with open("./barcodes/setting.ini", encoding='utf-8') as f:
                 text = f.read()
-            if not "location" in text:
-                file_identification_rewriting("./barcodes/setting.ini", "[etc]", "[etc]\nlocation = 未設定な施設\n")
             ini = configparser.ConfigParser()
             path = os.getcwd() + os.sep + 'barcodes/setting.ini'
             ini.read(path, 'UTF-8')
             password = ini["admin"]["password"]
-            mail_address = ini["gmail"]["mail_address"]
-            app_pass = ini["gmail"]["app_pass"]
-            location = ini["etc"]["location"]
-            title = [ini["title_setting"]["arriving"], ini["title_setting"]["gohome"]]
             text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
             etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
             break

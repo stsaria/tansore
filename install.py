@@ -77,8 +77,14 @@ ExecStart=/usr/bin/python {os.path.abspath(".")}/tansore.py %i
 [Install]
 WantedBy = graphical.target""")
         with open(f'./linux-file/update-cron.d.root', mode='w', encoding="utf-8") as f:
-            f.write(f"""0 19 * * * root systemctl stop tansore && rm {os.path.abspath(".")}/tansore.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/tansore.py && systemctl start tansore
-0 19 * * * root systemctl stop tansore && rm {os.path.abspath(".")}/install.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/install.py && systemctl start tansore""")
+            f.write(f"""0 6 * * * root systemctl stop tansore
+rm {os.path.abspath(".")}/tansore.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/tansore.py
+0 6 * * * root rm {os.path.abspath(".")}/main.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/main.py
+0 6 * * * root rm {os.path.abspath(".")}/etc.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/etc.py
+0 6 * * * root rm {os.path.abspath(".")}/gui.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/gui.py
+0 6 * * * root rm {os.path.abspath(".")}/mail.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/mail.py
+0 6 * * * root rm {os.path.abspath(".")}/install.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/install.py
+0 6 * * * root chown -R {os.getlogin()} && systemctl start tansore""")
     except:
         print(" Error\n")
         error = traceback.format_exc()

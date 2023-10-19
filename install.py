@@ -84,7 +84,7 @@ rm {os.path.abspath(".")}/tansore.py && wget -P {os.path.abspath(".")} https://g
 0 6 * * * root rm {os.path.abspath(".")}/gui.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/gui.py
 0 6 * * * root rm {os.path.abspath(".")}/mail.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/mail.py
 0 6 * * * root rm {os.path.abspath(".")}/install.py && wget -P {os.path.abspath(".")} https://github.com/stsaria/tansore/raw/main/install.py
-0 6 * * * root chown -R {os.getlogin()} && systemctl start tansore""")
+0 6 * * * root chown -R {os.getlogin()} {os.path.abspath(".")} && systemctl start tansore""")
     except:
         print(" Error\n")
         error = traceback.format_exc()

@@ -72,7 +72,7 @@ Environment="DISPLAY=:0.0"
 Environment="XAUTHORITY=/home/{os.getlogin()}/.Xauthority"
 
 #ExecStartPre = /usr/bin/printenv
-ExecStart=/usr/bin/python {os.path.abspath(".")}/tansore.py %i
+ExecStart=/usr/bin/python {os.path.abspath(".")}/tansore.py
 
 [Install]
 WantedBy = graphical.target""")

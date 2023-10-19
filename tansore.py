@@ -1,5 +1,4 @@
 import sys
-from gui import *
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
@@ -9,4 +8,5 @@ if __name__ == "__main__":
         else:
             print("I'm not sure about this argument.......")
     else:
+        from gui import gui
         gui()

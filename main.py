@@ -151,7 +151,7 @@ def edit(barcode : str, name : str, email : str):
         print(error)
         return 1, error
 
-def send_csv(dt_now = datetime.datetime.now()):
+def send_csv(login : bool, dt_now = datetime.datetime.now()):
     try:
         format_dt_now = dt_now.strftime('%Y/%m/%d %H:%M:%S')
         data = get_personal_data(csv_file = "./barcodes/barcodes.csv")
@@ -181,8 +181,9 @@ def send_csv(dt_now = datetime.datetime.now()):
         send_file_gmail(mail_address, app_pass, [mail_address], "CSV", "CSV", ["csv.zip"])
         shutil.rmtree("csv")
         os.remove("csv.zip")
-        with open(f'./barcodes/csvlog.txt', mode='a', encoding="utf-8") as f:
-            f.write("\n"+format_dt_now.split(" ")[0])
+        if login == False:
+            with open(f'./barcodes/csvlog.txt', mode='a', encoding="utf-8") as f:
+                f.write("\n"+format_dt_now.split(" ")[0])
         return 0
     except:
         error = traceback.format_exc()

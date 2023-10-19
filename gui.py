@@ -162,7 +162,7 @@ def gui():
                 window["statussendcsv"].update("管理者ではありません\n")
                 continue
             try:
-                result = main.send_csv(dt_now=dt_now)
+                result = main.send_csv(login, dt_now=dt_now)
                 if result == 0:
                     window["statussendcsv"].update("送信しました")
                 elif result == 1:

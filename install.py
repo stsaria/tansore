@@ -13,7 +13,7 @@ def install_print():
         print(".", end="")
         time.sleep(1)
 
-def main():
+def install_tansore():
     global end
     if not os.path.isfile("./tansore.py"):
         print("install.pyをtansoleディレクトリの中で実行してください")
@@ -89,6 +89,3 @@ WantedBy = graphical.target""")
     end = True
     print(" Success\n注: 勤怠するためにはiniファイルにGmailアドレス(あなたまたは組織用)とアプリパスワード(Google Api Token)を記載する必要があります\nLinux用のSystemdファイル(.serviceファイル)やcronファイル(root用)を./linux-file/ディレクトリに作成しました")
     return 0
-
-if __name__ == "__main__":
-    sys.exit(main())

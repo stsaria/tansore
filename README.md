@@ -26,15 +26,15 @@ pip install pysimplegui
 abc,aaa@bbb.ccc
 hoge,fuga@piyo.aho
 ```
-- tansore.pyを起動して指示通りインストー`python3 tansore.py -install`<br/>
-- tansore.pyを起動して勤怠システムを使用する`python3 tansore.py -install`<br/>
+- tansore.pyを起動して指示通りインストールする`python3 tansore.py -install`<br/>
+- tansore.pyを起動して勤怠システムを使用する`python3 tansore.py`<br/>
 - 必要があればcronやsystemdを設定する<br/>
 ## GUIでのマニュアル
 ### バーコードリーダーのセットアップ
 - リーダーをコンピューターにつなぐ<br/>
 - リーダーのマニュアルを見て、読み込み文字列の最後に半角スペースが出力されるように設定する<br/>
 ### 勤怠
-- tansore.pyを起動して、そのままバーコードを読み取る<br/>
+- tansore.pyを起動して`python3 tansore.py`、そのままバーコードを読み取る<br/>
 - "勤怠しました"と出たら成功です<br/>
 ### 管理者権限の取得
 - バーコードファイルの作成時に設定したパスワードを入力してください<br/>

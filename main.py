@@ -18,7 +18,7 @@ try:
     text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
     etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
 except:
-    print("error:ini file read")
+    pass
 
 def get_personal_data(csv_file : str):
     data = {}

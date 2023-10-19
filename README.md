@@ -26,8 +26,8 @@ pip install pysimplegui
 abc,aaa@bbb.ccc
 hoge,fuga@piyo.aho
 ```
-- install.pyを起動して指示通りインストール<br/>
-- tansore.pyを起動して勤怠システムを使用する<br/>
+- tansore.pyを起動して指示通りインストー`python3 tansore.py -install`<br/>
+- tansore.pyを起動して勤怠システムを使用する`python3 tansore.py -install`<br/>
 - 必要があればcronやsystemdを設定する<br/>
 ## GUIでのマニュアル
 ### バーコードリーダーのセットアップ

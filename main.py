@@ -83,6 +83,8 @@ def attendance(barcode : str):
     <h4>このメールは{1}から発信されています</h4>
     {2}
     <h4>このメールと同時に{1}にも<br/>勤怠データが保存されています</h4>
+    <h4>このプログラム(PythonによるGUIなど)を書いてくれる人がいれば<br/>
+    <a href="mailto:solothunder.autoer@gmail.com">solothunder.autoer@gmail.com</a>にご連絡ください</h4>
     <footer>
     <div style="font-size:12px;">
         <p>バグがありましたら<a href="mailto:solothunder.autoer@gmail.com">solothunder.autoer@gmail.com</a>にご連絡ください</p>
@@ -113,9 +115,7 @@ def attendance(barcode : str):
 
 def edit(barcode : str, name : str, email : str):
     try:
-        barcodes = []
-        names = []
-        emails = []
+        barcodes = names = emails = []
         with open("./barcodes/barcodes.csv", encoding='utf-8') as f:
             reader = csv.reader(f)
             header = next(reader)
@@ -184,6 +184,37 @@ def send_csv(login : bool, dt_now = datetime.datetime.now()):
         if login == False:
             with open(f'./barcodes/csvlog.txt', mode='a', encoding="utf-8") as f:
                 f.write("\n"+format_dt_now.split(" ")[0])
+        return 0
+    except:
+        error = traceback.format_exc()
+        print(error)
+        return 1
+
+def backup_file(file_name : str):
+    try:
+        with open(f"./barcodes/{file_name}", encoding="utf-8") as f:
+            contents_now_file = f.read()
+        with open(f"./barcodes/{file_name}.backup", encoding="utf-8") as f:
+            contents_backup_file = f.read()
+        with open(f"./barcodes/{file_name}", encoding="utf-8", mode='w') as f:
+            f.write(contents_backup_file)
+        with open(f"./barcodes/{file_name}.backup", encoding="utf-8", mode='w') as f:
+            f.write(contents_now_file)
+        return 0
+    except:
+        error = traceback.format_exc()
+        print(error)
+        return 1
+
+def direct_edit_file(file_name : str, after_text : str):
+    try:
+        with open(f"barcodes/{file_name}", encoding="utf-8") as f:
+            text = f.read()
+        with open(f"barcodes/{file_name}", encoding="utf-8", mode="w") as f:
+            f.write(after_text)
+        if not after_text == text:
+            with open(f"barcodes/{file_name}.backup", encoding="utf-8", mode="w") as f:
+                f.write(text)
         return 0
     except:
         error = traceback.format_exc()

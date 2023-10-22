@@ -1,5 +1,15 @@
-import configparser, traceback, platform, datetime, hashlib, tkinter, main, time, os
+import configparser, threading, traceback, platform, datetime, hashlib, tkinter, time, sys, os
 import PySimpleGUI as sg
+from editer import *
+from attendance import *
+from etc import *
+
+barcodes_txt_file_list = []
+
+for file in os.listdir("./barcodes/"):
+    base, ext = os.path.splitext(file)
+    if ext == '.txt':
+        barcodes_txt_file_list.append(file)
 
 for i in range(20):
     try:
@@ -40,9 +50,9 @@ for i in range(20):
         layout_direct_edit_file = [
                 [sg.Text('Direct Edit File', font=('',15)), sg.Text(key="statusdirectedit")],
                 [sg.Text('警告：直接ファイルを書き換えることは推奨されていません , 出席履歴ファイルは書き換えれません')],
-                [sg.Combo(['barcodes.csv', 'setting.ini'], key='selectfile', default_value="ファイルを選択してください", enable_events=True, readonly=True)],
+                [sg.Combo(['barcodes.csv', 'setting.ini'] + barcodes_txt_file_list, key='selectfile', default_value="ファイルを選択してください", enable_events=True, readonly=True)],
                 [sg.Multiline(key="inputedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), font=('',15), autoscroll=True)],
-                [sg.Button('書き換え',key='directedit'), sg.Button('再取得(巻き戻し)',key='regetfile'), sg.Button('backup',key='backup')]
+                [sg.Button('書き換え',key='directedit'), sg.Button('再取得(巻き戻し)',key='regetfile'), sg.Button('復元',key='backup')]
                 ]
         layout_main = [
                 [sg.Text("管理者パスワード"), sg.Input(key="password"), sg.Text(key="statuslogin")],
@@ -65,7 +75,23 @@ for i in range(20):
         print("This is Gui-error -----\n"+error+"-----------------------")
         time.sleep(6)
 
+count = 10
+
+def countdown_quit(n = 8):
+    global count
+    time.sleep(1)
+    for i in range(n):
+        count = n-i+1
+        text = "プログラム終了まで "+str(count)+"秒"
+        time.sleep(1)
+        window["statuslogin"].update(text)
+        window["settingstatus"].update(text)
+        window["statusedit"].update(text)
+        window["statusdirectedit"].update(text)
+        window["statusattendance"].update(text)
+
 def gui():
+    countdown_quit_target = threading.Thread(target=countdown_quit)
     try:
         with open("./barcodes/setting.ini", encoding='utf-8') as f:
             text = f.read()
@@ -81,6 +107,9 @@ def gui():
         return 2
     login = False
     while True:
+        global count
+        if count <= 0:
+            sys.exit(0)
         dt_now = datetime.datetime.now()
         format_dt_now = dt_now.strftime('%Y/%m/%d %H:%M:%S')
         final_send_csv_season = ["", "", ""]
@@ -97,7 +126,7 @@ def gui():
             try:
                 status = values["statusattendance"] + "\n"
                 window["statusattendance"].update(status)
-                result, error = main.attendance(values["barcodeattendance"].replace(" ", ""))
+                result, error = attendance(values["barcodeattendance"].replace(" ", ""))
                 if result == 0:
                     status = status + "勤怠しました\n"
                 elif result == 1:
@@ -127,7 +156,7 @@ def gui():
                         text = f.read()
                     with open(f"barcodes/barcodes.csv.backup", encoding="utf-8", mode="w") as f:
                         f.write(text)
-                    result, error = main.edit(values["barcodeedit"], values["name"], values["email"])
+                    result, error = edit(values["barcodeedit"], values["name"], values["email"])
                     if result == 0:
                         status = status + "編集しました\nbarcodes/barcodes.csv.backupがバックアップファイルです"
                     elif result == 1:
@@ -153,7 +182,7 @@ def gui():
                 window["statussendcsv"].update("管理者ではありません\n")
                 continue
             try:
-                result = main.send_csv(login, dt_now=dt_now)
+                result = send_csv(login, dt_now=dt_now)
                 if result == 0:
                     window["statussendcsv"].update("送信しました")
                 elif result == 1:
@@ -165,9 +194,6 @@ def gui():
         elif event == 'login':
             if login == True:
                 window["statuslogin"].update("すでにログインしています")
-                continue
-            elif values["password"] == "":
-                window["statuslogin"].update("パスワードが空です")
                 continue
             input_password = hashlib.sha256(values["password"].encode()).hexdigest()
             if password == input_password:
@@ -206,8 +232,9 @@ def gui():
                     window["settingstatus"].update("管理者ではありません\n")
                     continue
                 window["repassword"].update("")
-                result = main.setting_password(values["repassword"])
-                window["settingstatus"].update("パスワードを変更しました 再起動してください\n")
+                result = setting_password(values["repassword"])
+                window["settingstatus"].update("パスワードを変更しました 再起動しています\n")
+                countdown_quit_target.start()
             except:
                 error = traceback.format_exc()
                 print(error)
@@ -224,9 +251,10 @@ def gui():
                 if not "." in values["selectfile"]:
                     window["statusdirectedit"].update("選択したファイル名が空です")
                     continue
-                result = main.direct_edit_file(values["selectfile"], values["inputedit"])
+                result = direct_edit_file(values["selectfile"], values["inputedit"])
                 if result == 0:
-                    window["statusdirectedit"].update("書き換えに成功しました\n再起動してください\n(一個前のバックアップはbarcodes/"+values["selectfile"]+".backupにあります)")
+                    window["statusdirectedit"].update("書き換えに成功しました\n再起動しています\n(一個前のバックアップはbarcodes/"+values["selectfile"]+".backupにあります)")
+                    countdown_quit_target.start()
                 elif result == 1:
                     window["statusdirectedit"].update("書き換えに失敗しました")
                 if values["selectfile"] == "barcodes.csv":
@@ -242,9 +270,10 @@ def gui():
                 if not "." in values["selectfile"]:
                     window["statusdirectedit"].update("選択したファイル名が空です")
                     continue
-                result = main.backup_file(values["selectfile"])
+                result = backup_file(values["selectfile"])
                 if result == 0:
-                    window["statusdirectedit"].update("復元に成功しました\n再起動してください\n(今のファイルはbarcodes/"+values["selectfile"]+".backupに変わりました)")
+                    window["statusdirectedit"].update("復元に成功しました\n再起動しています\n(今のファイルはbarcodes/"+values["selectfile"]+".backupに変わりました)")
+                    countdown_quit_target.start()
                 elif result == 1:
                     window["statusdirectedit"].update("復元に失敗しました")
                 with open(f"./barcodes/"+values["selectfile"], encoding="utf-8") as f:

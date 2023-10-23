@@ -50,7 +50,7 @@ def attendance(barcode : str):
     try:
         format_dt_now = datetime.datetime.now().strftime('%Y:%m:%d:%H:%M:%S')
         data = get_personal_data(csv_file = "./barcodes/barcodes.csv")
-        to = ""
+        to = []
         name = ""
         try:
             to = data[barcode][1].split("/")

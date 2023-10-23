@@ -75,20 +75,20 @@ for i in range(20):
         print("This is Gui-error -----\n"+error+"-----------------------")
         time.sleep(6)
 
-count = 10
+count = 1000
 
 def countdown_quit(n = 8):
     global count
-    time.sleep(1)
+    time.sleep(2)
     for i in range(n):
-        count = n-i+1
+        count = n-(i+1)
         text = "プログラム終了まで "+str(count)+"秒"
-        time.sleep(1)
         window["statuslogin"].update(text)
         window["settingstatus"].update(text)
         window["statusedit"].update(text)
         window["statusdirectedit"].update(text)
         window["statusattendance"].update(text)
+        time.sleep(1)
 
 def gui():
     countdown_quit_target = threading.Thread(target=countdown_quit)

@@ -3,7 +3,9 @@ from etc import file_identification_rewriting
 
 def edit(barcode : str, name : str, email : str):
     try:
-        barcodes = names = emails = []
+        barcodes = []
+        names = []
+        emails = []
         with open("./barcodes/barcodes.csv", encoding='utf-8') as f:
             reader = csv.reader(f)
             header = next(reader)
@@ -25,9 +27,9 @@ def edit(barcode : str, name : str, email : str):
             after_email = "email"
         if not before_email == "email" and after_email == "email":
             after_email = before_email
-        if name == "" and email == "email" or "," in name:
+        if name == "" or "," in name:
             after_name = "name"
-        elif name == "" and after_name == "name":
+        if after_name == "name" and not after_email == "email":
             after_name = before_name
         if name == "" and email == "":
             after_email = "email"

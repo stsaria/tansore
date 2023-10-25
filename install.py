@@ -77,7 +77,7 @@ ExecStart=/usr/bin/python {os.path.abspath(".")}/tansore.py
 [Install]
 WantedBy = graphical.target""")
         with open(f'./linux-file/update-cron.d.root', mode='w', encoding="utf-8") as f:
-            f.write(f"""0 6,18 * * * systemctl stop tansore && rm -r {os.path.abspath("..")}/barcodes/ && cp -r {os.path.abspath(".")}/barcodes/ {os.path.abspath("..")}/barcodes/ && rm -r {os.path.abspath(".")} && git clone https://github.com/stsaria/tansore.git {os.path.abspath(".")} && cp -r {os.path.abspath("..")}/barcodes/ {os.path.abspath(".")}/barcodes/ && systemctl start tansore""")
+            f.write(f"""0 6,18 * * * systemctl stop tansore && rm -r {os.path.abspath("..")}/barcodes/ && cp -r {os.path.abspath(".")}/barcodes/ {os.path.abspath("..")}/barcodes/ && rm -r {os.path.abspath(".")} && mkdir {os.path.abspath(".")} && git clone https://github.com/stsaria/tansore.git {os.path.abspath(".")} && cp -r {os.path.abspath("..")}/barcodes/ {os.path.abspath(".")}/barcodes/ && systemctl start tansore""")
     except:
         print(" Error\n")
         error = traceback.format_exc()

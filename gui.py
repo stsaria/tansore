@@ -5,11 +5,13 @@ from attendance import *
 from etc import *
 
 barcodes_txt_file_list = []
-
-for file in os.listdir("./barcodes/"):
-    base, ext = os.path.splitext(file)
-    if ext == '.txt':
-        barcodes_txt_file_list.append(file)
+try:
+    for file in os.listdir("./barcodes/"):
+        base, ext = os.path.splitext(file)
+        if ext == '.txt':
+            barcodes_txt_file_list.append(file)
+except:
+    print("barcodes/ dir is not found")
 
 for i in range(20):
     try:

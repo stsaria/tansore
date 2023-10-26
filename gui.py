@@ -4,15 +4,21 @@ from editer import *
 from attendance import *
 from etc import *
 
-barcodes_txt_file_list = []
-try:
-    for file in os.listdir("./barcodes/"):
-        base, ext = os.path.splitext(file)
-        if ext == '.txt':
-            barcodes_txt_file_list.append(file)
-except:
-    print("barcodes/ dir is not found")
+period_stop = False
 
+def period_print():
+    global period_stop
+    while not period_stop:
+        print(".", end="")
+        time.sleep(0.5)
+    period_stop = False
+    return
+
+barcodes_txt_file_list = []
+
+print("GUI ",end="")
+period_print_thread = threading.Thread(target=period_print)
+period_print_thread.start()
 for i in range(20):
     try:
         sg.theme("Kayak")
@@ -71,8 +77,12 @@ for i in range(20):
         window = sg.Window("Yes Barcode System", layout_main, margins=(0,0), size=(monitor_width, monitor_height), resizable=True, finalize=True, no_titlebar=True, location=(0,0)).Finalize()
         window.Maximize()
         window["barcodeattendance"].set_focus()
+        period_stop = True
+        print(" Success")
         break
     except:
+        period_stop = True
+        print(" Error")
         error = traceback.format_exc()
         print("This is Gui-error -----\n"+error+"-----------------------")
         time.sleep(6)
@@ -93,8 +103,29 @@ def countdown_quit(n = 8):
         time.sleep(1)
 
 def gui():
+    global barcodes_txt_file_list
+    global period_stop
     countdown_quit_target = threading.Thread(target=countdown_quit)
     try:
+        print("barcodes/*.txt ",end="")
+        period_print_thread = threading.Thread(target=period_print)
+        period_print_thread.start()
+        for file in os.listdir("./barcodes/"):
+            base, ext = os.path.splitext(file)
+            if ext == '.txt':
+                barcodes_txt_file_list.append(file)
+        period_stop = True
+        print(" Success")
+    except Exception as e:
+        period_stop = True
+        print(" Error")
+        print(e)
+        return 3
+    del period_print_thread
+    try:
+        print("barcodes/setting.ini ",end="")
+        period_print_thread = threading.Thread(target=period_print)
+        period_print_thread.start()
         with open("./barcodes/setting.ini", encoding='utf-8') as f:
             text = f.read()
         ini = configparser.ConfigParser()
@@ -103,15 +134,18 @@ def gui():
         password = ini["admin"]["password"]
         text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
         etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
-    except:
-        print("Error : Ini File Error")
-        time.sleep(1)
-        return 2
+        period_stop = True
+        print(" Success")
+    except Exception as e:
+        period_stop = True
+        print(" Error")
+        print(e)
+        return 4
     login = False
     while True:
         global count
         if count <= 0:
-            sys.exit(0)
+            break
         dt_now = datetime.datetime.now()
         format_dt_now = dt_now.strftime('%Y/%m/%d %H:%M:%S')
         final_send_csv_season = ["", "", ""]
@@ -303,3 +337,4 @@ def gui():
                 error = traceback.format_exc()
                 print(error)
                 window["statusdirectedit"].update("ファイルの再取得に失敗しました")
+    return 0

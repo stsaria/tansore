@@ -1,4 +1,4 @@
-import configparser, traceback, datetime, shutil, zipfile, hashlib, os
+import configparser, traceback, datetime, shutil, zipfile, hashlib, socket, os
 from mail import send_file_gmail
 from getter import get_personal_data
 
@@ -18,6 +18,18 @@ def replace_func(fname, replace_set):
 def file_identification_rewriting(file_name, before, after):
     replace_setA = (before, after)
     replace_func(file_name, replace_setA)
+
+def check_network(host = "google.com", port = 80):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        return_code = sock.connect_ex((host, port))
+        sock.close()
+        if return_code == 0:
+            return True
+        else:
+            return False
+    except:
+        return False
 
 try:
     with open("./barcodes/setting.ini", encoding='utf-8') as f:

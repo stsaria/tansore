@@ -1,4 +1,6 @@
 # Tansore -Attendance System-
+## イメージ
+![image](https://github.com/stsaria/tansore/assets/123633917/298a3c06-fe3f-4063-be38-4fe749192ad8)
 ## 動作環境
 ### 必要CPUの種類
 - Windows(バーコード作成時) : x64, Amd64<br/>

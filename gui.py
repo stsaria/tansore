@@ -26,7 +26,7 @@ for i in range(20):
         monitor_height, monitor_width = root.winfo_screenheight(), root.winfo_screenwidth()
         root.withdraw()
         layout_attendance = [
-                [sg.Text("Tansore -Attendance System-", font=('',15))],
+                [sg.Text("勤怠 - 出席・下校", font=('',15))],
                 [sg.Text("バーコード:"), sg.Input(key="barcodeattendance")],
                 [sg.Multiline(key="statusattendance", expand_x=True, expand_y=True,  pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="バーコードを読み込んでください\n", autoscroll=True)]
                 ]
@@ -51,7 +51,7 @@ for i in range(20):
                 [sg.Text('_____________________________________________________________________________________________________________________')],
                 [sg.Text(f"コンピューター情報\nOS:{platform.system()} {platform.release()}\nPython:{platform.python_version()}")],
                 [sg.Text('_____________________________________________________________________________________________________________________')],
-                [sg.Text('作成者 : stsaria\nライセンス : LGPL Licence v3.0(Githubにも記載)')],
+                [sg.Text('作成元 : Saria(st)\nライセンス : LGPL Licence v3.0(Githubにも記載)')],
                 [sg.Text('_____________________________________________________________________________________________________________________')],
                 [sg.Text(key="settingstatus")]
                 ]
@@ -62,9 +62,16 @@ for i in range(20):
                 [sg.Multiline(key="inputedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), font=('',15), autoscroll=True)],
                 [sg.Button('書き換え',key='directedit'), sg.Button('再取得(巻き戻し)',key='regetfile'), sg.Button('復元',key='backup')]
                 ]
+        frame_thanks = [        
+            [sg.Image('image/yes-logo.png')]
+        ]
+        frame_login = [      
+            [sg.Text("管理者パスワード"), sg.Input(key="password")],
+            [sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了(再起動)", visible=False, key="exit"), sg.Text(key="statuslogin")]
+        ]
         layout_main = [
-                [sg.Text("管理者パスワード"), sg.Input(key="password"), sg.Text(key="statuslogin")],
-                [sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了(再起動)", visible=False, key="exit"), sg.Text(key="time", font=('Arial',15))],
+                [sg.Text("Tansore -Attendance System-", font=('',25)), sg.Text(key="time", font=('',17))],
+                [sg.Frame('ログイン',frame_login), sg.Frame('感謝', frame_thanks)],
                 [sg.Text("一緒にこのプログラムを改良しませんか？\n連絡はEmail:solothunder.autoer@gmail.com,Discord:test222")],
                 [sg.TabGroup([[
                 sg.Tab("勤怠", layout_attendance),

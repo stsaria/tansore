@@ -248,8 +248,8 @@ def gui():
                 window["statusdirectedit"].update("管理者ではありません")
                 continue
             try:
-                if not "." in values["selectfile"]:
-                    window["statusdirectedit"].update("選択したファイル名が空です")
+                if not os.path.isfile(values["selectfile"]):
+                    window["statusdirectedit"].update("選択したファイルがありません")
                     continue
                 result = direct_edit_file(values["selectfile"], values["inputedit"])
                 if result == 0:
@@ -267,8 +267,8 @@ def gui():
             if login == False:
                 window["statusdirectedit"].update("管理者ではありません")
             try:
-                if not "." in values["selectfile"]:
-                    window["statusdirectedit"].update("選択したファイル名が空です")
+                if not os.path.isfile(values["selectfile"]):
+                    window["statusdirectedit"].update("選択したファイルがありません")
                     continue
                 result = backup_file(values["selectfile"])
                 if result == 0:
@@ -290,8 +290,8 @@ def gui():
                 window["statusdirectedit"].update("管理者ではありません")
                 continue
             try:
-                if not "." in values["selectfile"]:
-                    window["statusdirectedit"].update("選択したファイル名が空です")
+                if not os.path.isfile(values["selectfile"]):
+                    window["statusdirectedit"].update("選択したファイルがありません")
                     continue
                 with open(f"barcodes/"+values["selectfile"], encoding="utf-8") as f:
                     text = f.read()

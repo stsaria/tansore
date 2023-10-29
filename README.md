@@ -8,11 +8,6 @@
 SystemdやCronは管理者権限を得ている人であることを前提で作成しています
 - このプログラムを重要なこと（ミスが許されない記録）などに使用することは
 おすすめできません（素直にちゃんとした会社のソフトを使いましょう）
-## イメージ
-### Windows (11)
-![image](https://github.com/stsaria/tansore/assets/123633917/2fbffb39-ce2c-44df-a982-6c1ded10b8b4)
-### Raspbian OS (Arm64 RaspberryPi 3B)
-![image](https://github.com/stsaria/tansore/assets/123633917/35621a66-efdf-4fcb-a8fb-952222c3793f)
 ## 動作環境
 ### バージョン等
 - Windows : 7 ~ 最新

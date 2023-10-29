@@ -63,16 +63,13 @@ for i in range(20):
                 [sg.Multiline(key="inputedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), font=('',15), autoscroll=True)],
                 [sg.Button('書き換え',key='directedit'), sg.Button('再取得(巻き戻し)',key='regetfile'), sg.Button('復元',key='backup')]
                 ]
-        frame_thanks = [        
-            [sg.Image('image/yes-logo.png')]
-        ]
         frame_login = [      
             [sg.Text("管理者パスワード"), sg.Input(key="password")],
             [sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了(再起動)", visible=False, key="exit"), sg.Text(key="statuslogin")]
         ]
         layout_main = [
                 [sg.Text("Tansore -Attendance System-", font=('',25)), sg.Text(key="time", font=('',17))],
-                [sg.Frame('ログイン',frame_login), sg.Frame('感謝', frame_thanks)],
+                [sg.Frame('ログイン',frame_login)],
                 [sg.Text("一緒にこのプログラムを改良しませんか？\n連絡はEmail:solothunder.autoer@gmail.com,Discord:test222")],
                 [sg.TabGroup([[
                 sg.Tab("勤怠", layout_attendance),
@@ -141,9 +138,13 @@ def gui():
         ini = configparser.ConfigParser()
         path = os.getcwd() + os.sep + 'barcodes/setting.ini'
         ini.read(path, 'UTF-8')
+        mail_address = ini["gmail"]["mail_address"]
+        app_pass = ini["gmail"]["app_pass"]
         password = ini["admin"]["password"]
         text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
         etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
+        if mail_address.count("@") == 1 or len(app_pass.replace(" ", "")) == 16:
+            raise Exception
         period_stop = True
         print(" Success")
     except Exception as e:

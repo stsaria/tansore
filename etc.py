@@ -46,6 +46,8 @@ try:
     title = [ini["title_setting"]["arriving"], ini["title_setting"]["gohome"]]
     text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
     etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
+    if mail_address.count("@") == 1 or len(app_pass.replace(" ", "")) == 16:
+        raise Exception
 except:
     pass
 

@@ -62,14 +62,14 @@ After = graphical.target
 Wants = graphical.target
 
 [Service]
-user = {getpass.getlogin()}
+user = {getpass.getuser()}
 
 WorkingDirectory={os.path.abspath(".")}
 
 Restart=always
 
 Environment="DISPLAY=:0.0"
-Environment="XAUTHORITY=/home/{getpass.getlogin()}/.Xauthority"
+Environment="XAUTHORITY=/home/{getpass.getuser()}/.Xauthority"
 
 #ExecStartPre = /usr/bin/printenv
 ExecStart=/usr/bin/python {os.path.abspath(".")}/tansore.py

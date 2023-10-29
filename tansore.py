@@ -23,8 +23,9 @@ def main(args : list):
     global help
     print("Tansore\nLICENCE : LGPL v3.0\nGithub : https://github.com/stsaria/tansore\n")
     if "--help" in args or not os.path.isdir("barcodes/"):
-        print(help)
-        sys.exit(0)
+        if not "--install" in args:
+            print(help)
+            sys.exit(0)
     print("System Name :", platform.system(),end="")
     if "--no-check-system-name" in args:
         print(" = Pass")

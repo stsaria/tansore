@@ -28,7 +28,8 @@ SystemdやCronは管理者権限を得ている人であることを前提で作
 ### 使用ライブラリ(非標準)
 - PySimpleGUI<br/>
 - aspose.barcode (任意)<br/>
-- romkan (任意)<br/>
+- romkan (任意)
+- tkinter (すでに入っている可能性があります)<br/>
 ### その他
 - ネットワーク環境(テザリング可)<br/>
 - 推奨Python : 3.7 ~ 最新
@@ -41,6 +42,7 @@ SystemdやCronは管理者権限を得ている人であることを前提で作
 pip install aspose-barcode-for-python-via-net (任意)
 pip install pysimplegui
 pip install romkan (任意)
+pip install tkinter (すでに入っている可能性があります)
 ```
 - 個人情報CSVファイルを作成(記述方法は以下)<br/>
 ```

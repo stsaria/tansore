@@ -1,4 +1,4 @@
-import threading, traceback, hashlib, random, time, csv, sys, os
+import threading, traceback, hashlib, getpass, random, time, csv, os
 import aspose.barcode as barcode
 import csv
 
@@ -62,14 +62,14 @@ After = graphical.target
 Wants = graphical.target
 
 [Service]
-user = {os.getlogin()}
+user = {getpass.getlogin()}
 
 WorkingDirectory={os.path.abspath(".")}
 
 Restart=always
 
 Environment="DISPLAY=:0.0"
-Environment="XAUTHORITY=/home/{os.getlogin()}/.Xauthority"
+Environment="XAUTHORITY=/home/{getpass.getlogin()}/.Xauthority"
 
 #ExecStartPre = /usr/bin/printenv
 ExecStart=/usr/bin/python {os.path.abspath(".")}/tansore.py

@@ -1,4 +1,4 @@
-import configparser, threading, traceback, platform, datetime, hashlib, tkinter, time, sys, os
+import configparser, threading, traceback, platform, datetime, hashlib, tkinter, time, os
 import PySimpleGUI as sg
 from editer import *
 from attendance import *
@@ -16,7 +16,7 @@ def period_print():
 
 barcodes_txt_file_list = []
 
-print("GUI ",end="")
+print("GUI Start ",end="")
 period_print_thread = threading.Thread(target=period_print)
 period_print_thread.start()
 for i in range(20):

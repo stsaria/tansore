@@ -42,7 +42,9 @@ SystemdやCronは管理者権限を得ている人であることを前提で作
 pip install aspose-barcode-for-python-via-net (任意)
 pip install pysimplegui
 pip install romkan (任意)
-pip install tkinter (すでに入っている可能性があります)
+pip install tkinter または pytk または(すでに入っている可能性があります)
+または
+apt install python3-tk (apt権限が必須)
 ```
 - 個人情報CSVファイルを作成(記述方法は以下)<br/>
 ```

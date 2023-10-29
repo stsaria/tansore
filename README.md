@@ -1,10 +1,24 @@
 # Tansore -Attendance System-
+## 注意
+- このプログラム(GUI)の画面は画面サイズにより
+収まりきらない可能性があります
+- このプログラムのライセンスはLGPL v3.0です
+ライセンスの詳細（文）はLICENSEファイルを確認してください
+- このプログラムを導入する場合は必ずシステムを管理している人に許可を得てください
+SystemdやCronは管理者権限を得ている人であることを前提で作成しています
+- このプログラムを重要なこと（ミスが許されない記録）などに使用することは
+おすすめできません（素直にちゃんとした会社のソフトを使いましょう）
 ## イメージ
 ### Windows (11)
 ![image](https://github.com/stsaria/tansore/assets/123633917/2fbffb39-ce2c-44df-a982-6c1ded10b8b4)
 ### Raspbian OS (Arm64 RaspberryPi 3B)
 ![image](https://github.com/stsaria/tansore/assets/123633917/35621a66-efdf-4fcb-a8fb-952222c3793f)
 ## 動作環境
+### バージョン等
+- Windows : 7 ~ 最新
+- Linux (この例ではUbuntu) : Ubuntu 16.04 ~ 最新
+
+- Python : 3.6以上
 ### 必要CPUの種類
 - Windows(バーコード作成時) : x64, Amd64<br/>
 - Linux(バーコード作成時) : x86, x64, Amd64<br/>
@@ -13,17 +27,20 @@
 - Linux(バーコード作成後) : x86, x64, Amd64, Arm64(AArch64), Arm32(AArch32)<br/>
 ### 使用ライブラリ(非標準)
 - PySimpleGUI<br/>
-- aspose.barcode<br/>
+- aspose.barcode (任意)<br/>
+- romkan (任意)<br/>
 ### その他
 - ネットワーク環境(テザリング可)<br/>
+- 推奨Python : 3.7 ~ 最新
 - 常識的な空き容量(HDD・SSD・SD・Emmc・USB)<br/>
 - 確認済みCPU : x64, Amd64, Arm64(AArch64)<br/>
 ## セットアップ
 - Githubなどからソースコードをダウンロード<br/>
 - pipでライブラリをインストール<br/>
 ```
-pip install aspose-barcode-for-python-via-net 
+pip install aspose-barcode-for-python-via-net (任意)
 pip install pysimplegui
+pip install romkan (任意)
 ```
 - 個人情報CSVファイルを作成(記述方法は以下)<br/>
 ```
@@ -31,7 +48,7 @@ pip install pysimplegui
 abc,aaa@bbb.ccc
 hoge,fuga@piyo.aho
 ```
-- tansore.pyを起動して指示通りインストールする`python3 tansore.py -install`<br/>
+- tansore.pyを起動して指示通りインストールする`python3 tansore.py --install`<br/>
 - tansore.pyを起動して勤怠システムを使用する`python3 tansore.py`<br/>
 - 必要があればcronやsystemdを設定する<br/>
 ## GUIでのマニュアル

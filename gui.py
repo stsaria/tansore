@@ -35,6 +35,7 @@ for i in range(20):
                 [sg.Text('バーコード'), sg.InputText(key='barcodeedit')],
                 [sg.Text('名前'), sg.InputText(key='name')],
                 [sg.Text('Email("/"区切り)'), sg.InputText(key='email')],
+                [sg.Checkbox('名前をローマ字からひらがなに変換する(romkan)', key='ifromkan')],
                 [sg.Multiline(key="statusedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=('Arial',15), default_text="情報を書いてください\n", autoscroll=True)],
                 [sg.Button('変更',key='edit')]
                 ]
@@ -84,6 +85,8 @@ for i in range(20):
         window = sg.Window("Yes Barcode System", layout_main, margins=(0,0), size=(monitor_width, monitor_height), resizable=True, finalize=True, no_titlebar=True, location=(0,0)).Finalize()
         window.Maximize()
         window["barcodeattendance"].set_focus()
+        if platform.system() == "Window":
+            window["ifromkan"].update(visible=False)
         period_stop = True
         print(" Success")
         break
@@ -189,17 +192,21 @@ def gui():
             window["barcodeattendance"].update("")
         elif event == 'edit':
             status = values["statusedit"] + "\n"
+            name = values["name"]
             if login == False:
                 status = status + "管理者ではありません\n"
                 window["statusedit"].update(status)
                 continue
             else:
                 try:
+                    if values["ifromkan"]:
+                        import romkan
+                        name = romkan.to_hiragana(name)
                     with open("barcodes/barcodes.csv", encoding="utf-8") as f:
                         text = f.read()
                     with open(f"barcodes/barcodes.csv.backup", encoding="utf-8", mode="w") as f:
                         f.write(text)
-                    result, error = edit(values["barcodeedit"], values["name"], values["email"])
+                    result, error = edit(values["barcodeedit"], name, values["email"])
                     if result == 0:
                         status = status + "編集しました\nbarcodes/barcodes.csv.backupがバックアップファイルです"
                     elif result == 1:
@@ -207,7 +214,11 @@ def gui():
                     elif result == 2:
                         status = status + "正しいバーコードを入力してください\n"
                     window["statusedit"].update(status)
-                except:
+                except ModuleNotFoundError:
+                    error = traceback.format_exc()
+                    print(error)
+                    window["statusedit"].update(status + "ローマ字変換モジュール(romkan)がありません"+error)
+                except Exception:
                     error = traceback.format_exc()
                     print(error)
                     window["statusedit"].update(status + "GUIで原因不明なエラーが発生しました\nerror : "+error)

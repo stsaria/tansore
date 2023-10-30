@@ -1,5 +1,8 @@
-import threading, platform, time, sys, os
+import threading, platform, logging, time, sys, os
 from etc import check_network
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s:%(name)s - %(message)s", filename="./tansore.log")
+logger = logging.getLogger(__name__)
 
 period_stop = False
 
@@ -26,41 +29,39 @@ def main(args : list):
         if not "--install" in args:
             print(help)
             sys.exit(0)
-    print("System Name :", platform.system(),end="")
-    if "--no-check-system-name" in args:
-        print(" = Pass")
-    elif platform.system() in ["Windows", "Linux"]:
-        print(" = OK")
-    else:
-        print(" = NG")
-        sys.exit(1)
-    print("Python Ver :" , ".".join(platform.python_version().split(".")[:2]),end="")
-    if "--no-check-python-ver" in args:
-        print(" = Pass")
-    elif int(platform.python_version().split(".")[:2][0]) == 3 and int(platform.python_version().split(".")[:2][1]) >= 6:
-        print(" = OK")
-    else:
-        print(" = NG")
-        sys.exit(1)
-    period_print_thread = threading.Thread(target=period_print)
-    print("\nNetwork ",end="")
-    period_print_thread.start()
-    if "--no-check-net" in args:
-        period_stop = True
-        print(" Pass")
-    elif not check_network():
-        period_stop = True
-        print(" Error")
-        sys.exit(2)
-    else:
-        period_stop = True
-        print(" Success")
-    del period_print_thread
     if "--install" in args:
         from install import install_tansore
         install_tansore()
+    logger.info("System Name : "+platform.system())
+    if "--no-check-system-name" in args:
+        logger.info("| Pass")
+    elif platform.system() in ["Windows", "Linux"]:
+        logger.info("| OK")
+    else:
+        logger.info("| NG")
+        sys.exit(1)
+    logger.info("Python Ver : "+".".join(platform.python_version().split(".")[:2]))
+    if "--no-check-python-ver" in args:
+        logger.info("| Pass")
+    elif int(platform.python_version().split(".")[:2][0]) == 3 and int(platform.python_version().split(".")[:2][1]) >= 6:
+        logger.info("| OK")
+    else:
+        logger.info("| NG")
+        sys.exit(1)
+    logger.info("Network Check")
+    if "--no-check-net" in args:
+        period_stop = True
+        logger.info("|Pass")
+    elif not check_network():
+        period_stop = True
+        logger.info("|Error")
+        sys.exit(2)
+    else:
+        period_stop = True
+        logger.info("|Success")
     from gui import gui
     gui()
 
 if __name__ == "__main__":
     main(sys.argv)
+    logger.info("STOP!!")

@@ -57,7 +57,7 @@ def install_tansore():
                 f.write(f'{i[0]},{i[1]},{i[2]}\n')
         with open(f'./linux-file/tansore.service', mode='w', encoding="utf-8") as f:
             f.write(f"""[Unit]
-Description = Tansore System
+Description = Tansore System Log : {os.path.abspath(".")}/tansore.log
 After = graphical.target
 Wants = graphical.target
 

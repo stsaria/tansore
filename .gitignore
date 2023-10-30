@@ -160,7 +160,7 @@ cython_debug/
 #.idea/
 
 # tansore only
-
+*.log
 barcodes/
 linux-file/
 barcodes.csv

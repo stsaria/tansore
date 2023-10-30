@@ -1,6 +1,9 @@
-import configparser, traceback, datetime, shutil, zipfile, hashlib, socket, os
+import configparser, traceback, datetime, shutil, zipfile, hashlib, logging, socket, os
 from mail import send_file_gmail
 from getter import get_personal_data
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s:%(name)s - %(message)s", filename="./tansore.log")
+logger = logging.getLogger(__name__)
 
 def replace_func(fname, replace_set):
     target, replace = replace_set
@@ -51,7 +54,8 @@ try:
 except:
     pass
 
-def send_csv(login : bool, dt_now = datetime.datetime.now()):
+def send_data(login : bool, dt_now = datetime.datetime.now()):
+    logger.info("Send Attendance LOG")
     try:
         format_dt_now = dt_now.strftime('%Y/%m/%d %H:%M:%S')
         data = get_personal_data(csv_file = "./barcodes/barcodes.csv")
@@ -84,10 +88,11 @@ def send_csv(login : bool, dt_now = datetime.datetime.now()):
         if login == False:
             with open(f'./barcodes/csvlog.txt', mode='a', encoding="utf-8") as f:
                 f.write("\n"+format_dt_now.split(" ")[0])
+        logger.info("|Success")
         return 0
     except:
         error = traceback.format_exc()
-        print(error)
+        logger.error("|Error : Unknow\n"+error)
         return 1
 
 def setting_password(password : str):

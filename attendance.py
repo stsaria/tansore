@@ -1,7 +1,10 @@
-import configparser, traceback, datetime, os
+import configparser, traceback, datetime, logging, os
 from mail import send_html_gmail
 from getter import get_personal_data
 from etc import file_identification_rewriting
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s:%(name)s - %(message)s", filename="./tansore.log")
+logger = logging.getLogger(__name__)
 
 try:
     with open("./barcodes/setting.ini", encoding='utf-8') as f:
@@ -49,6 +52,7 @@ def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_
         return 0, 0
 
 def attendance(barcode : str):
+    logger.info("Attendance")
     try:
         format_dt_now = datetime.datetime.now().strftime('%Y:%m:%d:%H:%M:%S')
         data = get_personal_data(csv_file = "./barcodes/barcodes.csv")
@@ -58,13 +62,14 @@ def attendance(barcode : str):
             to = data[barcode][1].split("/")
             name = data[barcode][0]
             if name == "" or name == "name":
+                logger.error("|Error : Not name in list")
                 return 3, ""
         except:
-            error = traceback.format_exc()
-            print(error)
-            return 2, error
+            logger.error("|Error : Read Barcode is Unknow code")
+            return 2, ""
         type, result = which_arriving_gohome(barcode, arriving_deadline_time = etc[2], arriving_isolation_period_min = etc[3], dt = datetime.datetime.now())
         if result == 1:
+            logger.error("|Error : every "+str(etc[3])+" min Attendance not allowed")
             return 4, ""
         if len(to) == data[barcode][1].count('@'):
             html = """<!DOCTYPE html>
@@ -101,8 +106,9 @@ def attendance(barcode : str):
                 f.write(f'\n{format_dt_now}/{str(type)}')
             else:
                 f.write(f'{format_dt_now}/{str(type)}')
+        logger.info("|Success")
         return 0, ""
     except:
         error = traceback.format_exc()
-        print(error)
+        logger.error("|Error : Unknow\n"+error)
         return 1, error

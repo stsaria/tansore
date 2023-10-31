@@ -4,7 +4,20 @@ from editer import *
 from attendance import *
 from etc import *
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s:%(name)s - %(message)s", filename="./tansore.log")
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)
+stream_handler.setFormatter(logging.Formatter("%(asctime)s@ %(message)s"))
+os.makedirs('./log', exist_ok=True)
+
+file_handler = logging.FileHandler(
+    f"./log/tansore.log"
+)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(
+    logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s '%(funcName)s'")
+)
+
+logging.basicConfig(level=logging.NOTSET, handlers=[stream_handler, file_handler])
 logger = logging.getLogger(__name__)
 
 barcodes_txt_file_list = []
@@ -31,7 +44,7 @@ for i in range(20):
                 [sg.Button("変更",key="edit")]
                 ]
         layout_csv_view = [
-                [sg.Text("CSV VIEW", font=("",15)), sg.Button("CSV等情報送信",key="sendattendancelog"), sg.Text(key="statussendattendancelog")],
+                [sg.Text("CSV VIEW", font=("",15)), sg.Button("勤怠情報等情報送信",key="senddatalog"), sg.Text(key="statussenddatalog")],
                 [sg.Text("空はいま登録されてないバーコードです")],
                 [sg.Multiline(key="csv", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=("Arial",15), autoscroll=True)]
                 ]
@@ -139,8 +152,8 @@ def gui():
         dt_now = datetime.datetime.now()
         format_dt_now = dt_now.strftime("%Y/%m/%d %H:%M:%S")
         final_send_csv_season = ["", "", ""]
-        if os.path.isfile("./barcodes/csvlog.txt"):
-            f = open("./barcodes/csvlog.txt", "r")
+        if os.path.isfile("./log/send-log.txt"):
+            f = open("./log/send-log.txt", "r")
             alltxt = f.readlines()
             f.close()
             final_send_csv_season = alltxt[-1].strip().split("/")
@@ -212,21 +225,21 @@ def gui():
             window["csv"].update("".join(text_list[1:]).replace(",name,email", ",空"))
             if values["selectfile"] == "barcodes.csv":
                 window["inputedit"].update("".join(text_list))
-        elif event == "sendattendancelog" or int(format_dt_now.split(" ")[0].split("/")[2]) >= etc[0] and int(format_dt_now.split(" ")[1].split(":")[0]) >= etc[1] and not [format_dt_now.split(" ")[0].split("/")[0], format_dt_now.split(" ")[0].split("/")[1]] == [final_send_csv_season[0], final_send_csv_season[1]]:
-            if event == "sendattendancelog" and login == False:
-                window["statussendattendancelog"].update("管理者ではありません\n")
-                logger.error("Send Attendance LOG|Now not admin")
+        elif event == "senddatalog" or int(format_dt_now.split(" ")[0].split("/")[2]) >= etc[0] and int(format_dt_now.split(" ")[1].split(":")[0]) >= etc[1] and not [format_dt_now.split(" ")[0].split("/")[0], format_dt_now.split(" ")[0].split("/")[1]] == [final_send_csv_season[0], final_send_csv_season[1]]:
+            if event == "senddatalog" and login == False:
+                window["statussenddatalog"].update("管理者ではありません\n")
+                logger.error("Send Data & LOG|Now not admin")
                 continue
             try:
                 result = send_data(login, dt_now=dt_now)
                 if result == 0:
-                    window["statussendattendancelog"].update("送信しました")
+                    window["statussenddatalog"].update("送信しました")
                 elif result == 1:
-                    window["statussendattendancelog"].update("原因不明なエラーが発生しました")
+                    window["statussenddatalog"].update("原因不明なエラーが発生しました")
             except:
                 error = traceback.format_exc()
                 logger.error("|Error : GUI Error\n"+error)
-                window["statussendattendancelog"].update("GUIで原因不明なエラーが発生しました")
+                window["statussenddatalog"].update("GUIで原因不明なエラーが発生しました")
         elif event == "login":
             logger.info("User Login")
             if login == True:

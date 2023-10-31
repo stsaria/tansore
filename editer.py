@@ -1,7 +1,20 @@
-import traceback, logging, csv
+import traceback, logging, csv, os
 from etc import file_identification_rewriting
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s:%(name)s - %(message)s", filename="./tansore.log")
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)
+stream_handler.setFormatter(logging.Formatter("%(asctime)s@ %(message)s"))
+os.makedirs('./log', exist_ok=True)
+
+file_handler = logging.FileHandler(
+    f"./log/tansore.log"
+)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(
+    logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s '%(funcName)s'")
+)
+
+logging.basicConfig(level=logging.NOTSET, handlers=[stream_handler, file_handler])
 logger = logging.getLogger(__name__)
 
 def edit(barcode : str, name : str, email : str):

@@ -2,7 +2,20 @@ import configparser, traceback, datetime, shutil, zipfile, hashlib, logging, soc
 from mail import send_file_gmail
 from getter import get_personal_data
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s:%(name)s - %(message)s", filename="./tansore.log")
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)
+stream_handler.setFormatter(logging.Formatter("%(asctime)s@ %(message)s"))
+os.makedirs('./log', exist_ok=True)
+
+file_handler = logging.FileHandler(
+    f"./log/tansore.log"
+)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(
+    logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s '%(funcName)s'")
+)
+
+logging.basicConfig(level=logging.NOTSET, handlers=[stream_handler, file_handler])
 logger = logging.getLogger(__name__)
 
 def replace_func(fname, replace_set):
@@ -55,39 +68,56 @@ except:
     pass
 
 def send_data(login : bool, dt_now = datetime.datetime.now()):
-    logger.info("Send Attendance LOG")
+    logger.info("Send Data & LOG")
     try:
+        os.makedirs("data-log", exist_ok=True)
         format_dt_now = dt_now.strftime('%Y/%m/%d %H:%M:%S')
-        data = get_personal_data(csv_file = "./barcodes/barcodes.csv")
-        os.makedirs("csv", exist_ok=True)
+        logger.info("Log")
+        with open("./log/tansore.log", encoding="utf-8") as f:
+            log_text = f.read()
+        with open("./data-log/tansore.log", mode='w', encoding="utf-8") as f:
+            f.write(log_text)
+        with open("./log/tansore.log", mode="w", encoding="utf-8") as f:
+            f.write("")
+        logger.info("Attendance Data")
+        personal_data = get_personal_data(csv_file = "./barcodes/barcodes.csv")
         files = os.listdir("barcodes")
         arriving_files = []
         for i in files:
             if ".txt" in i and i.replace(".txt", "").isdigit():
                 arriving_files.append(i)
         for i in arriving_files:
-            name = data[i.replace(".txt", "")][0]
+            name = personal_data[i.replace(".txt", "")][0]
             with open("barcodes/"+i, encoding="utf-8") as f:
                 text_list = f.readlines()
             text = "時間,種類\n"
             for j in text_list:
                 text = text + j.replace(":", "年", 1).replace(":", "月", 1).replace(":", "日", 1).replace("/0", ",登校").replace("/1", ",下校")
-            with open("./csv/"+name+"-"+i.replace(".txt", ".csv"), mode='w', encoding="utf-8") as f:
+            with open("./data-log/"+name+"-"+i.replace(".txt", ".csv"), mode='w', encoding="utf-8") as f:
                 f.write(text)
             with open("./barcodes/old-"+format_dt_now.split(" ")[0].split("/")[0]+"-"+format_dt_now.split(" ")[0].split("/")[1]+"-"+i, mode='w', encoding="utf-8") as f:
                 f.write("".join(text_list))
             with open("barcodes/"+i, mode="w", encoding="utf-8") as f:
                 f.write("")
-        zp = zipfile.ZipFile("csv.zip", "w")
-        for i in os.listdir("csv"):
-            zp.write("csv/"+i)
+        zp = zipfile.ZipFile("data-log.zip", "w")
+        for i in os.listdir("data-log"):
+            zp.write("data-log/"+i)
         zp.close()
-        send_file_gmail(mail_address, app_pass, [mail_address], "CSV", "CSV", ["csv.zip"])
-        shutil.rmtree("csv")
-        os.remove("csv.zip")
+
+        send_file_gmail(mail_address, app_pass, [mail_address], "data-log", "Send Data & LOG\nTHIS IS IMPORTANT", ["data-log.zip"])
+        
+        shutil.rmtree("data-log")
+        os.remove("data-log.zip")
+        text_list = []
         if login == False:
-            with open(f'./barcodes/csvlog.txt', mode='a', encoding="utf-8") as f:
-                f.write("\n"+format_dt_now.split(" ")[0])
+            if os.path.isfile('./log/send-log.txt'):
+                with open('./log/send-log.txt', mode='r', encoding="utf-8") as f:
+                    text_list = f.readlines()
+            with open('./log/send-log.txt', mode='a', encoding="utf-8") as f:
+                if len(text_list) > 0:
+                    f.write("\n"+format_dt_now.split(" ")[0])
+                else:
+                    f.write(format_dt_now.split(" ")[0])
         logger.info("|Success")
         return 0
     except:

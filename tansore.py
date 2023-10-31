@@ -1,9 +1,21 @@
-import threading, platform, logging, time, sys, os
+import platform, logging, time, sys, os
 from etc import check_network
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s:%(name)s - %(message)s", filename="./tansore.log")
-logger = logging.getLogger(__name__)
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)
+stream_handler.setFormatter(logging.Formatter("%(asctime)s@ %(message)s"))
+os.makedirs('./log', exist_ok=True)
 
+file_handler = logging.FileHandler(
+    f"./log/tansore.log"
+)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(
+    logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s '%(funcName)s'")
+)
+
+logging.basicConfig(level=logging.NOTSET, handlers=[stream_handler, file_handler])
+logger = logging.getLogger(__name__)
 period_stop = False
 
 help = """Help

@@ -45,7 +45,8 @@ def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_
         return 1, 0
     if os.path.isfile("./barcodes/"+barcode+".txt"):
         with open("./barcodes/"+barcode+".txt", 'r', encoding="utf-8") as f:
-            for line in f:  pass
+            lines = f.readlines()
+            line = lines[len(lines)-1]
             last_line = line.split("/")
             last_line_time = last_line[0].split(":")
             last_line_which_one = last_line[1]

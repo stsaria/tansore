@@ -309,7 +309,7 @@ def gui():
                 logger.error("Direct Edit|Error : Now not admin")
                 continue
             try:
-                if not os.path.isfile(values["selectfile"]):
+                if not os.path.isfile("barcodes/"+values["selectfile"]):
                     window["statusdirectedit"].update("選択したファイルがありません")
                     logger.error("Direct Edit|Error : Not select status")
                     continue
@@ -332,7 +332,7 @@ def gui():
                 logger.error("Backup|Error : Now not admin")
                 continue
             try:
-                if not os.path.isfile(values["selectfile"]):
+                if not os.path.isfile("barcodes/"+values["selectfile"]):
                     window["statusdirectedit"].update("選択したファイルがありません")
                     logger.error("Backup|Error : Not select status")
                     continue
@@ -359,7 +359,7 @@ def gui():
                 logger.error("|Error : Now not admin")
                 continue
             try:
-                if not os.path.isfile(values["selectfile"]):
+                if not os.path.isfile("barcodes/"+values["selectfile"]):
                     window["statusdirectedit"].update("選択したファイルがありません")
                     logger.error("| Error : Not select status")
                     continue

@@ -7,9 +7,7 @@ stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(logging.Formatter("%(asctime)s@ %(message)s"))
 os.makedirs('./log', exist_ok=True)
 
-file_handler = logging.FileHandler(
-    f"./log/tansore.log"
-)
+file_handler = logging.FileHandler("./log/tansore.log", encoding='utf-8')
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(
     logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s '%(funcName)s'")
@@ -110,10 +108,10 @@ def send_data(login : bool, dt_now = datetime.datetime.now()):
         os.remove("data-log.zip")
         text_list = []
         if login == False:
-            if os.path.isfile('./log/send-log.txt'):
-                with open('./log/send-log.txt', mode='r', encoding="utf-8") as f:
+            if os.path.isfile('./log/send-log.log'):
+                with open('./log/send-log.log', mode='r', encoding="utf-8") as f:
                     text_list = f.readlines()
-            with open('./log/send-log.txt', mode='a', encoding="utf-8") as f:
+            with open('./log/send-log.log', mode='a', encoding="utf-8") as f:
                 if len(text_list) > 0:
                     f.write("\n"+format_dt_now.split(" ")[0])
                 else:

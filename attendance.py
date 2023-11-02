@@ -8,9 +8,7 @@ stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(logging.Formatter("%(asctime)s@ %(message)s"))
 os.makedirs('./log', exist_ok=True)
 
-file_handler = logging.FileHandler(
-    f"./log/tansore.log"
-)
+file_handler = logging.FileHandler("./log/tansore.log", encoding='utf-8')
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(
     logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s '%(funcName)s'")
@@ -18,6 +16,7 @@ file_handler.setFormatter(
 
 logging.basicConfig(level=logging.NOTSET, handlers=[stream_handler, file_handler])
 logger = logging.getLogger(__name__)
+
 try:
     with open("./barcodes/setting.ini", encoding='utf-8') as f:
         text = f.read()
@@ -39,24 +38,27 @@ except:
     pass
 
 def which_arriving_gohome(barcode : str, dt = datetime.datetime.now(), arriving_deadline_time = 18, arriving_isolation_period_min = 10):
-    """0 = arriving, 1 = gohome"""
+    """type : 0 = arriving, 1 = gohome"""
     format_dt_now = dt.strftime('%Y:%m:%d:%H:%M:%S')
     if int(format_dt_now.split(":")[3]) >= arriving_deadline_time:
         return 1, 0
     if os.path.isfile("./barcodes/"+barcode+".txt"):
         with open("./barcodes/"+barcode+".txt", 'r', encoding="utf-8") as f:
             lines = f.readlines()
-            line = lines[len(lines)-1]
-            last_line = line.split("/")
-            last_line_time = last_line[0].split(":")
-            last_line_which_one = last_line[1]
-            if last_line_time[:3] == format_dt_now.split(":")[:3]:
-                if last_line_time[3] == format_dt_now.split(":")[3] and (int(format_dt_now.split(":")[4]) - int(last_line_time[4])) <= arriving_isolation_period_min:
-                    return None, 1
-                elif last_line_which_one == "0":
-                    return 1, 0
-                elif int(last_line_time[3]) >= arriving_deadline_time:
-                    return 0, 0
+            if not len(lines) <= 0:                
+                line = lines[len(lines)-1]
+                last_line = line.split("/")
+                last_line_time = last_line[0].split(":")
+                last_line_which_one = last_line[1]
+                if last_line_time[:3] == format_dt_now.split(":")[:3]:
+                    if last_line_time[3] == format_dt_now.split(":")[3] and (int(format_dt_now.split(":")[4]) - int(last_line_time[4])) <= arriving_isolation_period_min:
+                        return None, 1
+                    elif last_line_which_one == "0":
+                        return 1, 0
+                    elif int(last_line_time[3]) >= arriving_deadline_time:
+                        return 0, 0
+                    else:
+                        return 0, 0
                 else:
                     return 0, 0
             else:
@@ -106,10 +108,15 @@ def attendance(barcode : str):
     </footer>
 </body>
 </html>"""
-            if type == 0:
-                send_html_gmail(mail_address, app_pass, to, title[0], html.format(title[0], location, text[0].replace("/name/", name)))
-            else:
-                send_html_gmail(mail_address, app_pass, to, title[1], html.format(title[1], location, text[1].replace("/name/", name)))
+            try:
+                if type == 0:
+                    send_html_gmail(mail_address, app_pass, to, title[0], html.format(title[0], location, text[0].replace("/name/", name)))
+                else:
+                    send_html_gmail(mail_address, app_pass, to, title[1], html.format(title[1], location, text[1].replace("/name/", name)))
+            except:
+                error = traceback.format_exc()
+                logger.error("|Error : Send email\n"+error)
+                return 5, error
         text_list = []
         if os.path.isfile("./barcodes/"+barcode.replace(" ", "")+".txt"):
             with open("./barcodes/"+barcode.replace(" ", "")+".txt", mode='r', encoding="utf-8") as f:

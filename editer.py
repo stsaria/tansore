@@ -6,9 +6,7 @@ stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(logging.Formatter("%(asctime)s@ %(message)s"))
 os.makedirs('./log', exist_ok=True)
 
-file_handler = logging.FileHandler(
-    f"./log/tansore.log"
-)
+file_handler = logging.FileHandler("./log/tansore.log", encoding='utf-8')
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(
     logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s '%(funcName)s'")

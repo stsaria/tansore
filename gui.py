@@ -9,9 +9,7 @@ stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(logging.Formatter("%(asctime)s@ %(message)s"))
 os.makedirs('./log', exist_ok=True)
 
-file_handler = logging.FileHandler(
-    f"./log/tansore.log"
-)
+file_handler = logging.FileHandler("./log/tansore.log", encoding='utf-8')
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(
     logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s '%(funcName)s'")
@@ -19,8 +17,6 @@ file_handler.setFormatter(
 
 logging.basicConfig(level=logging.NOTSET, handlers=[stream_handler, file_handler])
 logger = logging.getLogger(__name__)
-
-barcodes_txt_file_list = []
 
 logger.info("GUI Start")
 for i in range(20):
@@ -32,21 +28,21 @@ for i in range(20):
         layout_attendance = [
                 [sg.Text("勤怠 - 出席・下校", font=("",15))],
                 [sg.Text("バーコード:"), sg.Input(key="barcodeattendance")],
-                [sg.Multiline(key="statusattendance", expand_x=True, expand_y=True,  pad=((0,0),(0,0)), disabled=True, font=("Arial",15), default_text="バーコードを読み込んでください\n", autoscroll=True)]
+                [sg.Multiline(key="statusattendance", expand_x=True, expand_y=True,  pad=((0,0),(0,0)), disabled=True, default_text="バーコードを読み込んでください\n", autoscroll=True)]
                 ]
         layout_csv_edit = [
-                [sg.Text("内容変更", font=("",15)), sg.Text("注:・何も入力しない場合は空になります\n・BackUpファイルは一個しかありません\n2回変えると一回目のデータは消えます\n復元は直接編集でできます\n名前にnameと入力するのは避けてください")],
+                [sg.Text("内容変更", font=("",15)), sg.Text("注:・何も入力しない場合は空になります・BackUpファイルは一個しかありません\n・2回変えると一回目のデータは消えます・復元は直接編集のタブでできます\n・名前にnameと入力するのは避けてください")],
                 [sg.Text("バーコード"), sg.InputText(key="barcodeedit")],
                 [sg.Text("名前"), sg.InputText(key="name")],
                 [sg.Text("Email('/'区切り)"), sg.InputText(key="email")],
                 [sg.Checkbox("名前をローマ字からひらがなに変換する(romkan)", key="ifromkan")],
-                [sg.Multiline(key="statusedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=("Arial",15), default_text="情報を書いてください\n", autoscroll=True)],
+                [sg.Multiline(key="statusedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, default_text="情報を書いてください\n", autoscroll=True)],
                 [sg.Button("変更",key="edit")]
                 ]
         layout_csv_view = [
                 [sg.Text("CSV VIEW", font=("",15)), sg.Button("勤怠情報等情報送信",key="senddatalog"), sg.Text(key="statussenddatalog")],
                 [sg.Text("空はいま登録されてないバーコードです")],
-                [sg.Multiline(key="csv", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, font=("Arial",15), autoscroll=True)]
+                [sg.Multiline(key="csv", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, autoscroll=True)]
                 ]
         layout_setting = [
                 [sg.Text("設定", font=("",15))],
@@ -63,8 +59,8 @@ for i in range(20):
         layout_direct_edit_file = [
                 [sg.Text("Direct Edit File", font=("",15)), sg.Text(key="statusdirectedit")],
                 [sg.Text("警告：直接ファイルを書き換えることは推奨されていません , 出席履歴ファイルは書き換えれません")],
-                [sg.Combo(["barcodes.csv", "setting.ini"] + barcodes_txt_file_list, key="selectfile", default_value="ファイルを選択してください", enable_events=True, readonly=True)],
-                [sg.Multiline(key="inputedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), font=("",15), autoscroll=True)],
+                [sg.Combo(["barcodes.csv", "setting.ini"], key="selectfile", default_value="ファイルを選択してください", size=26, enable_events=True, readonly=True)],
+                [sg.Multiline(key="inputedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), autoscroll=True)],
                 [sg.Button("書き換え",key="directedit"), sg.Button("再取得(巻き戻し)",key="regetfile"), sg.Button("復元",key="backup")]
                 ]
         frame_login = [      
@@ -112,7 +108,7 @@ def countdown_quit(n = 8):
         time.sleep(1)
 
 def gui():
-    global barcodes_txt_file_list
+    barcodes_txt_file_list = []
     global period_stop
     countdown_quit_target = threading.Thread(target=countdown_quit)
     try:
@@ -123,9 +119,9 @@ def gui():
                 barcodes_txt_file_list.append(file)
         logger.info("|length = "+str(len(barcodes_txt_file_list)))
     except Exception as e:
-        logger.error("|Error")
-        print(e)
+        logger.error("|Error\n"+str(e))
         return 3
+    window["selectfile"].update(values = ["barcodes.csv", "setting.ini"] + barcodes_txt_file_list, value="ファイルを選択してください")
     try:
         logger.info("Read barcodes/setting.ini")
         with open("./barcodes/setting.ini", encoding="utf-8") as f:
@@ -152,8 +148,8 @@ def gui():
         dt_now = datetime.datetime.now()
         format_dt_now = dt_now.strftime("%Y/%m/%d %H:%M:%S")
         final_send_csv_season = ["", "", ""]
-        if os.path.isfile("./log/send-log.txt"):
-            f = open("./log/send-log.txt", "r")
+        if os.path.isfile("./log/send-log.log"):
+            f = open("./log/send-log.log", "r")
             alltxt = f.readlines()
             f.close()
             final_send_csv_season = alltxt[-1].strip().split("/")
@@ -176,6 +172,8 @@ def gui():
                     status = status + "リストから名前が見つかりませんでした\n"
                 elif result == 4:
                     status = status + f"{str(etc[3])}分の動作は許されません\n"
+                elif result == 5:
+                    status = status + "Emailの送信に失敗しました\n"
                 window["statusattendance"].update(status)
             except:
                 error = traceback.format_exc()

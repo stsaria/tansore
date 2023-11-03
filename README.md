@@ -33,6 +33,15 @@ SystemdやCronは管理者権限を得ている人であることを前提で作
 - 確認済みCPU : x64, Amd64, Arm64(AArch64)<br/>
 ## セットアップ
 - Githubなどからソースコードをダウンロード<br/>
+- 個人情報CSVファイルを作成(記述方法は以下)<br/>
+```
+名前,メールアドレス
+abc,aaa@bbb.ccc
+hoge,fuga@piyo.aho
+```
+- インストールはinstall.sh,.batを実行すれば<br/>
+ライブラリをpipでインストールしますが<br/>
+それで動かない場合や工程を知りたい人は以下の工程を見てください
 - pipでライブラリをインストール<br/>
 ```
 pip install aspose-barcode-for-python-via-net (任意)
@@ -42,13 +51,9 @@ pip install tkinter または pytk または(すでに入っている可能性�
 または
 apt install python3-tk (apt権限が必須)
 ```
-- 個人情報CSVファイルを作成(記述方法は以下)<br/>
-```
-名前,メールアドレス
-abc,aaa@bbb.ccc
-hoge,fuga@piyo.aho
-```
 - tansore.pyを起動して指示通りインストールする`python3 tansore.py --install`<br/>
+<br/>
+<br/>
 - tansore.pyを起動して勤怠システムを使用する`python3 tansore.py`<br/>
 - 必要があればcronやsystemdを設定する<br/>
 ## GUIでのマニュアル

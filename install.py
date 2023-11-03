@@ -15,6 +15,12 @@ def install_print():
 
 def install_tansore():
     global end
+    print("Install\n")
+    if os.path.isdir("barcodes"):
+        print("すでにインストールされているように見えます\n\
+        インストールしますか?")
+        if not input("Y(Yes) OR N(No) : ") == "Y":
+            return
     file = input("個人情報が記載されているCSVファイル名を入力してください : ")
     location = input("システムが設置されている施設名を入力してください : ")
     password = hashlib.sha256(input("新しい管理者パスワードを入力してください : ").encode()).hexdigest()

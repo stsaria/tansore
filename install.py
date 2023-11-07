@@ -1,4 +1,4 @@
-import threading, traceback, hashlib, getpass, random, time, csv, os
+import threading, traceback, hashlib, getpass, random, shutil, time, csv, os
 import aspose.barcode as barcode
 import csv
 
@@ -15,6 +15,14 @@ def install_print():
 
 def install_tansore():
     global end
+    print("Install\n")
+    if os.path.isdir("barcodes"):
+        print("すでにインストールされているように見えます\n\
+インストールしますか?")
+        if input("Y(Yes) OR N(No) : ").lower() == "y":
+            shutil.rmtree("barcodes")
+        else:
+            return
     file = input("個人情報が記載されているCSVファイル名を入力してください : ")
     location = input("システムが設置されている施設名を入力してください : ")
     password = hashlib.sha256(input("新しい管理者パスワードを入力してください : ").encode()).hexdigest()

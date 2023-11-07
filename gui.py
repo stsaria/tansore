@@ -68,9 +68,8 @@ for i in range(20):
             [sg.Button("ログイン", key="login"), sg.Button("ログアウト", key="logout"), sg.Button("終了(再起動)", visible=False, key="exit"), sg.Text(key="statuslogin")]
         ]
         layout_main = [
-                [sg.Text("Tansore -Attendance System-", font=("",25)), sg.Text(key="time", font=("",17))],
+                [sg.Text("-Attendance System-", font=("",25), key="title"), sg.Text(key="time", font=("",17))],
                 [sg.Frame("ログイン",frame_login)],
-                [sg.Text("一緒にこのプログラムを改良しませんか？\n連絡はEmail:solothunder.autoer@gmail.com,Discord:test222")],
                 [sg.TabGroup([[
                 sg.Tab("勤怠", layout_attendance),
                 sg.Tab("CSV編集", layout_csv_edit, visible=False, key="editab"),
@@ -134,12 +133,14 @@ def gui():
         password = ini["admin"]["password"]
         text = [ini["text_setting"]["arriving"], ini["text_setting"]["gohome"]]
         etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
+        location = ini["etc"]["location"]
         if not mail_address.count("@") == 1 or not len(app_pass.replace(" ", "")) == 16:
             raise Exception
         logger.info("|Success")
     except Exception as e:
         logger.error("|Error\n"+str(e))
         return 4
+    window["title"].update(location+" -Attendance System-")
     login = False
     while True:
         global count

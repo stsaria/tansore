@@ -35,9 +35,10 @@ for i in range(20):
                 [sg.Text("バーコード"), sg.InputText(key="barcodeedit")],
                 [sg.Text("名前"), sg.InputText(key="name")],
                 [sg.Text("Email('/'区切り)"), sg.InputText(key="email")],
+                [sg.Checkbox("新たにバーコードを追加(既存のバーコードを追加する)", key="newbarcode")],
                 [sg.Checkbox("名前をローマ字からひらがなに変換する(romkan)", key="ifromkan")],
                 [sg.Multiline(key="statusedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), disabled=True, default_text="情報を書いてください\n", autoscroll=True)],
-                [sg.Button("変更",key="edit")]
+                [sg.Button("変更",key="csvedit")]
                 ]
         layout_csv_view = [
                 [sg.Text("CSV VIEW", font=("",15)), sg.Button("勤怠情報等情報送信",key="senddatalog"), sg.Text(key="statussenddatalog")],
@@ -58,7 +59,7 @@ for i in range(20):
                 ]
         layout_direct_edit_file = [
                 [sg.Text("Direct Edit File", font=("",15)), sg.Text(key="statusdirectedit")],
-                [sg.Text("警告：直接ファイルを書き換えることは推奨されていません , 出席履歴ファイルは書き換えれません")],
+                [sg.Text("警告：直接ファイルを書き換えることは推奨されていません")],
                 [sg.Combo(["barcodes.csv", "setting.ini"], key="selectfile", default_value="ファイルを選択してください", size=26, enable_events=True, readonly=True)],
                 [sg.Multiline(key="inputedit", expand_x=True, expand_y=True, pad=((0,0),(0,0)), autoscroll=True)],
                 [sg.Button("書き換え",key="directedit"), sg.Button("再取得(巻き戻し)",key="regetfile"), sg.Button("復元",key="backup")]
@@ -72,7 +73,7 @@ for i in range(20):
                 [sg.Frame("ログイン",frame_login)],
                 [sg.TabGroup([[
                 sg.Tab("勤怠", layout_attendance),
-                sg.Tab("CSV編集", layout_csv_edit, visible=False, key="editab"),
+                sg.Tab("CSV編集", layout_csv_edit, visible=False, key="csveditab"),
                 sg.Tab("CSV閲覧", layout_csv_view, visible=False, key="csvviewtab"),
                 sg.Tab("直接編集", layout_direct_edit_file, visible=False, key="directeditfiletab"),
                 sg.Tab("設定", layout_setting, visible=False, key="settingtab")
@@ -182,7 +183,7 @@ def gui():
                 window["statusattendance"].update(status + "GUIで原因不明なエラーが発生しました\nerror : "+error)
             window["statusattendance"].update(status + "\n\nバーコードを読み込んでください")
             window["barcodeattendance"].update("")
-        elif event == "edit":
+        elif event == "csvedit":
             status = values["statusedit"] + "\n"
             name = values["name"]
             if login == False:
@@ -195,11 +196,7 @@ def gui():
                     if values["ifromkan"]:
                         import romkan
                         name = romkan.to_hiragana(name)
-                    with open("barcodes/barcodes.csv", encoding="utf-8") as f:
-                        text = f.read()
-                    with open(f"barcodes/barcodes.csv.backup", encoding="utf-8", mode="w") as f:
-                        f.write(text)
-                    result, error = edit(values["barcodeedit"], name, values["email"])
+                    result, error = edit(values["barcodeedit"], name, values["email"], values["newbarcode"])
                     if result == 0:
                         status = status + "編集しました\nbarcodes/barcodes.csv.backupがバックアップファイルです"
                     elif result == 1:
@@ -251,7 +248,7 @@ def gui():
                 logger.info("|Success")
                 window["statuslogin"].update("ログインしました")
                 window["exit"].update(visible=True)
-                window["editab"].update(visible=True)
+                window["csveditab"].update(visible=True)
                 window["csvviewtab"].update(visible=True)
                 window["settingtab"].update(visible=True)
                 window["directeditfiletab"].update(visible=True)
@@ -273,7 +270,7 @@ def gui():
                 continue
             login = False
             window["exit"].update(visible=False)
-            window["editab"].update(visible=False)
+            window["csveditab"].update(visible=False)
             window["csvviewtab"].update(visible=False)
             window["settingtab"].update(visible=False)
             window["directeditfiletab"].update(visible=False)

@@ -136,7 +136,8 @@ def gui():
         etc = [int(ini["etc"]["send_csv_deadline_day"]), int(ini["etc"]["send_csv_deadline_time"]), int(ini["etc"]["arriving_deadline_time"]), int(ini["etc"]["arriving_isolation_period_min"])]
         location = ini["etc"]["location"]
         if not mail_address.count("@") == 1 or not len(app_pass.replace(" ", "")) == 16:
-            raise Exception
+            logger.warning("|Not found Gmail Account or Gmail APP pass")
+            raise Exception('View log(Want?)')
         logger.info("|Success")
     except Exception as e:
         logger.error("|Error\n"+str(e))

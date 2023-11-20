@@ -60,6 +60,8 @@ def install_tansore():
             return
     file = input("個人情報が記載されているCSVファイル名を入力してください : ")
     location = input("システムが設置されている施設名を入力してください : ")
+    if location.replace(" ", "") == "":
+        location = "未設定な施設"
     password = hashlib.sha256(input("新しい管理者パスワードを入力してください : ").encode()).hexdigest()
     install_print_thread = threading.Thread(target=install_print)
     install_print_thread.start()

@@ -23,12 +23,12 @@ def barcode_generator(barcode_num : str, name : str):
     
     img = Image.open("barcodes/"+barcode_num+"-barcode.png")
     
-    img_resized = img.resize((395, 65))
+    img_resized = img.resize((395, 82))
     img_resized.save("barcodes/"+barcode_num+"-barcode.png", quality=90)
     
     img = Image.open("barcodes/"+barcode_num+"-barcode.png")
     
-    bottom_margin_size = 30
+    bottom_margin_size = 35
     
     new_width = img.width
     new_height = img.height + bottom_margin_size
@@ -40,12 +40,10 @@ def barcode_generator(barcode_num : str, name : str):
     
     draw = ImageDraw.Draw(img_re)
     font = ImageFont.truetype("source/NotoSansJP-SemiBold.ttf", font_size)
-    text = barcode_num+"  "+name
     
-    x = 30
-    y = img_re.height - bottom_margin_size
+    text = barcode_num+" - "+name
     
-    draw.text((x, y), text, (0, 0, 0), font=font)
+    draw.text((197.5, img_re.height - bottom_margin_size), text, (0, 0, 0), font=font, anchor='ma')
     img_re.save("barcodes/"+barcode_num+"-barcode.png")
 
 def install_tansore():
@@ -57,8 +55,9 @@ def install_tansore():
         if input("Y(Yes) OR N(No) : ").lower() == "y":
             shutil.rmtree("barcodes")
         else:
+            end = True
             return
-    file = input("個人情報が記載されているCSVファイル名を入力してください : ")
+    file = input("個人情報が記載されているCSVファイル(UTF-8)名を入力してください : ")
     location = input("システムが設置されている施設名を入力してください : ")
     if location.replace(" ", "") == "":
         location = "未設定な施設"
@@ -123,6 +122,7 @@ WantedBy = graphical.target""")
         print(" Error\n")
         error = traceback.format_exc()
         print(error)
+        end = True
         return 1
     end = True
     print(" Success\n注: 勤怠するためにはiniファイルにGmailアドレス(あなたまたは組織用)とアプリパスワード(Google Api Token)を記載する必要があります\nLinux用のSystemdファイル(.serviceファイル)やcronファイル(root用)を./linux-file/ディレクトリに作成しました")

@@ -54,8 +54,6 @@ pip install tkinter または pytk または(すでに入っている可能性�
 apt install python3-tk (apt権限が必須)
 ```
 - tansore.pyを起動して指示通りインストールする`python3 tansore.py --install`<br/>
-<br/>
-<br/>
 - tansore.pyを起動して勤怠システムを使用する`python3 tansore.py`<br/>
 - 必要があればcronやsystemdを設定する<br/>
 ## GUIでのマニュアル

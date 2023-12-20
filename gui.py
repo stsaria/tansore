@@ -32,7 +32,7 @@ for i in range(20):
                 ]
         layout_csv_edit = [
                 [sg.Text("内容変更", font=("",15)), sg.Text("注:・何も入力しない場合は空になります・BackUpファイルは一個しかありません\n・2回変えると一回目のデータは消えます・復元は直接編集のタブでできます\n・名前にnameと入力するのは避けてください")],
-                [sg.Text("バーコード"), sg.InputText(key="barcodeedit")],
+                [sg.Text("バーコード"), sg.InputText(key="barcode")],
                 [sg.Text("名前"), sg.InputText(key="name")],
                 [sg.Text("Email('/'区切り)"), sg.InputText(key="email")],
                 [sg.Checkbox("新たにバーコードを追加(既存のバーコードを追加する)", key="newbarcode")],
@@ -197,7 +197,7 @@ def gui():
                     if values["ifromkan"]:
                         import romkan
                         name = romkan.to_hiragana(name)
-                    result, error = edit(values["barcodeedit"], name, values["email"], values["newbarcode"])
+                    result, error = edit(values["barcode"].replace(" ", ""), name, values["email"], values["newbarcode"])
                     if result == 0:
                         status = status + "編集しました\nbarcodes/barcodes.csv.backupがバックアップファイルです"
                     elif result == 1:
@@ -214,7 +214,7 @@ def gui():
                     logger.error("|Error : GUI Error\n"+error)
                     window["statusedit"].update(status + "GUIで原因不明なエラーが発生しました\nerror : "+error)
             window["statusedit"].update(status + "\n\n情報を書いてください")
-            window["barcodeedit"].update("")
+            window["barcode"].update("")
             window["name"].update("")
             window["email"].update("")
             with open("barcodes/barcodes.csv", encoding="utf-8") as f:

@@ -110,9 +110,9 @@ def attendance(barcode : str):
 </html>"""
             try:
                 if type == 0:
-                    send_html_gmail(mail_address, app_pass, to, title[0], html.format(title[0], location, text[0].replace("/name/", name)))
+                    send_html_gmail(mail_address, app_pass, to, title[0], html.format(title[0], location, text[0].replace("/name/", name)), cc=to)
                 else:
-                    send_html_gmail(mail_address, app_pass, to, title[1], html.format(title[1], location, text[1].replace("/name/", name)))
+                    send_html_gmail(mail_address, app_pass, to, title[1], html.format(title[1], location, text[1].replace("/name/", name)), cc=to)
             except:
                 error = traceback.format_exc()
                 logger.error("|Error : Send email\n"+error)
